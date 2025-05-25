@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import {
   ArrowRight,
@@ -30,6 +30,7 @@ export default function WelcomePage({ onStart }: WelcomePageProps) {
   const [activeExample, setActiveExample] = useState("before")
   const [isVisible, setIsVisible] = useState(false)
   const [scrollY, setScrollY] = useState(0)
+  const examplesRef = useRef<HTMLElement>(null)
 
   useEffect(() => {
     setIsVisible(true)
@@ -37,6 +38,10 @@ export default function WelcomePage({ onStart }: WelcomePageProps) {
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
+
+  const scrollToExamples = () => {
+    examplesRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }
 
   const features = [
     {
@@ -92,7 +97,7 @@ Use a tone that creates urgency without inducing despair, and include credible d
 
   return (
     <div className="w-full min-h-screen overflow-x-hidden">
-      {/* Hero Section - Full Viewport */}
+      {/* Hero Section */}
       <section className="relative w-full h-screen flex items-center justify-center overflow-hidden z-10">
         {/* Animated Background */}
         <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-indigo-900 to-purple-900">
@@ -147,6 +152,7 @@ Use a tone that creates urgency without inducing despair, and include credible d
                 <Button
                   variant="outline"
                   size="lg"
+                  onClick={scrollToExamples}
                   className="w-full sm:w-auto px-8 sm:px-10 py-4 sm:py-6 text-lg sm:text-xl border-white/30 text-white hover:bg-white/10 backdrop-blur-sm transition-all duration-300"
                 >
                   <Star className="mr-2 sm:mr-3 h-5 w-5 sm:h-6 sm:w-6" />
@@ -179,8 +185,11 @@ Use a tone that creates urgency without inducing despair, and include credible d
         </div>
       </section>
 
-      {/* Before/After Example - Full Viewport */}
-      <section className="relative w-full min-h-screen flex items-center justify-center py-12 sm:py-20 lg:py-32 bg-gradient-to-b from-slate-50 to-white dark:from-slate-800 dark:to-slate-900 z-20">
+      {/* Before/After Example Section - Add ref here */}
+      <section 
+        ref={examplesRef}
+        className="relative w-full min-h-screen flex items-center justify-center py-12 sm:py-20 lg:py-32 bg-gradient-to-b from-slate-50 to-white dark:from-slate-800 dark:to-slate-900 z-20"
+      >
         {/* Gradient overlay for smooth transition */}
         <div className="absolute top-0 left-0 right-0 h-16 sm:h-20 bg-gradient-to-b from-purple-900/20 to-transparent"></div>
 
