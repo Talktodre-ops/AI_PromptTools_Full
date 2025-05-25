@@ -7,15 +7,19 @@ import PromptCard from "@/components/prompt-card"
 import { Button } from "@/components/ui/button"
 import { RefreshCw } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
-import { PromptResultsProps } from "@/types"
+import type { Prompt } from "@/types"
 
-export default function PromptResults({ results }: PromptResultsProps) {
+interface Props {
+  results: Prompt[]
+}
+
+export default function PromptResults({ results }: Props) {
   const { toast } = useToast()
   const [showExplanation, setShowExplanation] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
   const handleCopyAll = () => {
-    const allPrompts = results.join("\n\n---\n\n")
+    const allPrompts = results.map((result) => result.prompt).join("\n\n---\n\n")
     navigator.clipboard.writeText(allPrompts)
     toast({
       title: "All prompts copied",
