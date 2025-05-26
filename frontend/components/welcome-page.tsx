@@ -97,9 +97,9 @@ Use a tone that creates urgency without inducing despair, and include credible d
 
   return (
     <div className="w-full min-h-screen overflow-x-hidden">
-      {/* Hero Section */}
-      <section className="relative w-full h-screen flex items-center justify-center overflow-hidden z-10">
-        {/* Animated Background */}
+      {/* Hero Section - Adjusted for mobile */}
+      <section className="relative w-full min-h-[100svh] flex items-center justify-center overflow-hidden z-10">
+        {/* Animated Background - Keep existing code */}
         <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-indigo-900 to-purple-900">
           <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cg%20fill%3D%22none%22%20fillRule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%239C92AC%22%20fillOpacity%3D%220.1%22%3E%3Ccircle%20cx%3D%2230%22%20cy%3D%2230%22%20r%3D%222%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E')] opacity-20"></div>
 
@@ -109,37 +109,39 @@ Use a tone that creates urgency without inducing despair, and include credible d
           <div className="absolute bottom-10 left-10 w-32 h-32 sm:-bottom-8 sm:left-20 sm:w-72 sm:h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
         </div>
 
-        {/* Content - Perfectly Centered */}
-        <div className="relative z-20 w-full h-full flex items-center justify-center px-4 sm:px-6 lg:px-8">
+        {/* Content - Adjusted for mobile */}
+        <div className="relative z-20 w-full flex items-center justify-center px-4 sm:px-6 lg:px-8 py-16 sm:py-0">
           <div className="w-full max-w-7xl mx-auto text-center">
-            <div
-              className={`space-y-6 sm:space-y-8 transition-all duration-1000 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}
-            >
+            <div className={`space-y-6 sm:space-y-8 transition-all duration-1000 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}>
               <div className="space-y-4 sm:space-y-6">
+                {/* Badge - Adjusted size */}
                 <Badge
                   variant="secondary"
-                  className="px-4 py-2 sm:px-6 sm:py-3 text-sm sm:text-base font-medium bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20 transition-all duration-300"
+                  className="px-3 py-1.5 sm:px-6 sm:py-3 text-sm sm:text-base font-medium bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20 transition-all duration-300"
                 >
-                  <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 mr-2 animate-pulse" />
+                  <Sparkles className="h-3.5 w-3.5 sm:h-5 sm:w-5 mr-2 animate-pulse" />
                   AI-Powered Prompt Engineering
                 </Badge>
 
-                <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-white leading-tight">
+                {/* Title - Adjusted font sizes and spacing */}
+                <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-white leading-tight px-2 sm:px-0">
                   Transform
-                  <span className="block bg-gradient-to-r from-amber-400 via-orange-500 to-pink-500 bg-clip-text text-transparent animate-gradient-x">
+                  <span className="block bg-gradient-to-r from-amber-400 via-orange-500 to-pink-500 bg-clip-text text-transparent animate-gradient-x mt-2">
                     Messy Thoughts
                   </span>
-                  <span className="block">into Perfect Prompts</span>
+                  <span className="block mt-2">into Perfect Prompts</span>
                 </h1>
 
-                <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-slate-200 max-w-5xl mx-auto leading-relaxed px-4">
+                {/* Subtitle - Adjusted size and padding */}
+                <p className="text-base sm:text-xl md:text-2xl lg:text-3xl text-slate-200 max-w-3xl mx-auto leading-relaxed px-2 sm:px-4">
                   Stop struggling with prompt engineering. Our AI-powered tool turns your rough ideas into
                   <span className="text-amber-400 font-semibold"> high-quality, ready-to-use prompts</span> that get
                   better results from any AI model.
                 </p>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center pt-6 sm:pt-8">
+              {/* Buttons - Already responsive, but adjusted padding */}
+              <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center px-4 sm:px-0">
                 <div onClick={onStart} className="cursor-pointer">
                   <Button
                     size="lg"
@@ -160,8 +162,8 @@ Use a tone that creates urgency without inducing despair, and include credible d
                 </Button>
               </div>
 
-              {/* Stats - Responsive Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 pt-12 sm:pt-16 max-w-5xl mx-auto">
+              {/* Stats - Already responsive */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 pt-8 sm:pt-16 max-w-5xl mx-auto px-4 sm:px-0">
                 {stats.map((stat, index) => (
                   <div
                     key={index}
@@ -179,9 +181,9 @@ Use a tone that creates urgency without inducing despair, and include credible d
           </div>
         </div>
 
-        {/* Scroll Indicator */}
-        <div className="absolute bottom-6 sm:bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce z-30">
-          <ChevronDown className="h-6 w-6 sm:h-8 sm:w-8 text-white/60" />
+        {/* Scroll Indicator - Adjusted position */}
+        <div className="absolute bottom-4 sm:bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce z-30">
+          <ChevronDown className="h-5 w-5 sm:h-8 sm:w-8 text-white/60" />
         </div>
       </section>
 
