@@ -19,19 +19,17 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
       <div className="container mx-auto px-4 py-4 md:py-12 max-w-5xl">
-        {/* Increased top padding for mobile */}
-        <header className="mb-6 md:mb-8 text-center space-y-4 pt-16 md:pt-8">
-          {/* Adjusted text sizes and added mobile padding */}
-          <h1 className="text-3xl md:text-4xl font-bold text-slate-800 dark:text-slate-100 px-4">
+        {/* Reduced top padding for mobile and adjusted spacing */}
+        <header className="mb-6 md:mb-8 text-center space-y-3 pt-8 md:pt-12">
+          <h1 className="text-2xl md:text-4xl font-bold text-slate-800 dark:text-slate-100">
             Prompt Engineer
           </h1>
-          <p className="text-base md:text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto px-4 leading-relaxed">
+          <p className="text-sm md:text-lg text-slate-600 dark:text-slate-400 max-w-xl mx-auto leading-relaxed">
             Transform your messy thoughts into high-quality, ready-to-use AI prompts
           </p>
         </header>
 
-        {/* Increased spacing between elements */}
-        <div className="grid gap-8 md:gap-8 mt-8">
+        <div className="grid gap-6 md:gap-8 mt-6 md:mt-8">
           <PromptForm onResults={setResults} />
           <div className="min-h-[100px]">
             {results.length > 0 ? (
