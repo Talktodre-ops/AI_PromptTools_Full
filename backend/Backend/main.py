@@ -4,7 +4,7 @@ from routers import refine, explain
 from dotenv import load_dotenv
 import os
 
-load_dotenv
+load_dotenv()
 
 app = FastAPI()
 
