@@ -21,8 +21,13 @@ export async function fetchFromApi<T>(
   endpoint: string, 
   options: RequestInit = {}
 ): Promise<T> {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL
+  if (!baseUrl) {
+    throw new Error('API URL not configured')
+  }
+
   const url = `${baseUrl}${endpoint}`
+  console.log('Fetching from:', url) // Debug log
 
   const response = await fetch(url, {
     ...options,
@@ -33,7 +38,9 @@ export async function fetchFromApi<T>(
   })
 
   if (!response.ok) {
-    throw new Error(`API Error: ${response.status}`)
+    const error = await response.text()
+    console.error('API Error:', error) // Debug log
+    throw new Error(`API Error: ${response.status} - ${error}`)
   }
 
   return response.json()
