@@ -7,7 +7,8 @@ import PromptCard from "@/components/prompt-card"
 import { Button } from "@/components/ui/button"
 import { RefreshCw } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
-import type { Prompt } from "@/types"
+import { Prompt } from "@/types"
+import { Card, CardContent } from "@/components/ui/card"
 
 interface Props {
   results: Prompt[]
@@ -26,6 +27,9 @@ export default function PromptResults({ results }: Props) {
       description: "All prompts have been copied to your clipboard.",
     })
   }
+
+  // Add console.log to debug incoming results
+  console.log('Rendering results:', results)
 
   if (!results.length) return null
 
@@ -56,6 +60,18 @@ export default function PromptResults({ results }: Props) {
             prompt={prompt}
             showExplanation={showExplanation}
           />
+        ))}
+      </div>
+
+      <div className="space-y-4">
+        {results.map((result) => (
+          <Card key={result.id} className="overflow-hidden">
+            <CardContent className="p-4">
+              <pre className="whitespace-pre-wrap text-sm">
+                {result.prompt}
+              </pre>
+            </CardContent>
+          </Card>
         ))}
       </div>
     </div>

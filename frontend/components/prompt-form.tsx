@@ -6,10 +6,10 @@ import { Card } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
-import { generatePrompts } from "@/lib/api"
+import { fetchFromApi, type PromptResponse, type PromptRequest } from "@/lib/api"
+import type { Prompt } from "@/types"
 import { useToast } from "@/components/ui/use-toast"
 import { cleanPromptText } from "@/lib/utils"
-import type { Prompt, PromptResponse } from "@/types"
 
 const MODES = [
 	{ value: "basic", label: "Basic" },
@@ -48,59 +48,39 @@ interface Props {
 export default function PromptForm({ onResults }: Props) {
 	const [isLoading, setIsLoading] = useState(false)
 	const { toast } = useToast()
-	const [formData, setFormData] = useState({
-		input: "",
+	const [formData, setFormData] = useState<PromptRequest>({
+		raw_input: "",
 		mode: "deep",
 		tone: "default",
 		persona: "none",
-		format: "plain",
+		return_format: "plain",  // Changed from format to return_format
 	})
 
-	const handleSubmit = async (event: React.FormEvent) => {
-		event.preventDefault()
+	const handleSubmit = async (e: React.FormEvent) => {
+		e.preventDefault()
 		setIsLoading(true)
 
 		try {
-			const result = await generatePrompts({
-				raw_input: formData.input,
-				mode: formData.mode,
-				tone: formData.tone,
-				persona: formData.persona === "none" ? "" : formData.persona,
-				return_format: formData.format,
+			const response = await fetchFromApi<PromptResponse>('/refine', {
+				method: 'POST',
+				body: JSON.stringify(formData)
 			})
 
-			console.log('Raw API Response:', result)
-
-			if (result.error) {
-				console.error(result.error)
-				toast({
-					title: "Error",
-					description: result.error,
-					variant: "destructive",
-				})
-				return
-			}
-
-			if (result.data?.refined_prompts) {
-				const formattedPrompts: Prompt[] = result.data.refined_prompts.map((promptText: string, index: number) => ({
+			if (response.refined_prompts) {
+				const prompts: Prompt[] = response.refined_prompts.map((promptText: string, index: number) => ({
 					id: index.toString(),
-					prompt: formData.mode === "deep" ? cleanPromptText(promptText) : promptText
-				}));
-				console.log('Formatted prompts:', formattedPrompts);
-				onResults(formattedPrompts);
-			} else {
-				toast({
-					title: "Error",
-					description: "No prompts received from server",
-					variant: "destructive",
-				})
+					prompt: promptText
+				}))
+				
+				console.log('Transformed Prompts:', prompts)
+				onResults(prompts)
 			}
 		} catch (error) {
-			console.error("Form submission failed:", error)
+			console.error('Form submission error:', error)
 			toast({
 				title: "Error",
-				description: "Failed to generate prompts",
-				variant: "destructive",
+				description: error instanceof Error ? error.message : "Failed to process prompt",
+				variant: "destructive"
 			})
 		} finally {
 			setIsLoading(false)
@@ -116,8 +96,8 @@ export default function PromptForm({ onResults }: Props) {
 						key="prompt-input"
 						id="prompt-input"
 						placeholder="Enter your idea, question, or task here. Be as specific as possible."
-						value={formData.input}
-						onChange={(e) => setFormData({ ...formData, input: e.target.value })}
+						value={formData.raw_input}
+						onChange={(e) => setFormData({ ...formData, raw_input: e.target.value })}
 						className="min-h-[200px] resize-y text-base"
 					/>
 				</div>
@@ -183,8 +163,8 @@ export default function PromptForm({ onResults }: Props) {
 					<div className="space-y-2">
 						<Label>Output Format</Label>
 						<Select
-							value={formData.format}
-							onValueChange={(value) => setFormData({ ...formData, format: value })}
+							value={formData.return_format}
+							onValueChange={(value) => setFormData({ ...formData, return_format: value })}
 						>
 							<SelectTrigger>
 								<SelectValue placeholder="Select format" />

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Suspense } from "react"
 import type { Prompt } from "@/types"
 import PromptForm from "@/components/prompt-form"
@@ -11,6 +11,16 @@ import { Toaster } from "@/components/ui/toaster"
 export default function Home() {
   const [results, setResults] = useState<Prompt[]>([])
   const [hasStarted, setHasStarted] = useState(false)
+
+  // Debug results changes with useEffect instead of inline console.log
+  useEffect(() => {
+    console.log('Current results:', results)
+  }, [results])
+
+  const handleResults = (newResults: Prompt[]) => {
+    console.log('Setting new results:', newResults)
+    setResults(newResults)
+  }
 
   if (!hasStarted) {
     return <WelcomePage onStart={() => setHasStarted(true)} />
@@ -30,7 +40,7 @@ export default function Home() {
         </header>
 
         <div className="grid gap-6 md:gap-8 mt-6 md:mt-8">
-          <PromptForm onResults={setResults} />
+          <PromptForm onResults={handleResults} />
           <div className="min-h-[100px]">
             {results.length > 0 ? (
               <Suspense fallback={<div className="h-32 flex items-center justify-center">Loading results...</div>}>

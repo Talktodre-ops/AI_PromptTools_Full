@@ -15,44 +15,32 @@ export interface PromptResponse {
   refined_prompts: string[]  // Changed to match the API response
 }
 
-interface ApiError {
-  message: string;
-  status?: number;
-}
-
-interface ApiResponse<T> {
-  data?: T;
-  error?: string;
-}
-
 const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 export async function fetchFromApi<T>(
   endpoint: string, 
   options: RequestInit = {}
-): Promise<ApiResponse<T>> {
-  try {
-    const response = await fetch(`${apiUrl}${endpoint}`, {
-      ...options,
-      headers: {
-        "Content-Type": "application/json",
-        ...options.headers,
-      },
-    });
+): Promise<T> {
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+  const url = `${baseUrl}${endpoint}`
 
-    if (!response.ok) {
-      throw new Error(`API Error: ${response.status}`);
-    }
+  const response = await fetch(url, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...options.headers,
+    },
+  })
 
-    return await response.json();
-  } catch (error) {
-    console.error('API Request failed:', error);
-    return { error: 'Failed to fetch data from API' };
+  if (!response.ok) {
+    throw new Error(`API Error: ${response.status}`)
   }
+
+  return response.json()
 }
 
 // Typed API functions
-export async function generatePrompts(payload: PromptRequest): Promise<ApiResponse<PromptResponse>> {
+export async function generatePrompts(payload: PromptRequest): Promise<PromptResponse> {
   return fetchFromApi<PromptResponse>('/refine', {
     method: 'POST',
     body: JSON.stringify(payload),
