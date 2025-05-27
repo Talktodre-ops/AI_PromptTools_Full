@@ -13,7 +13,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         os.getenv("CORS_ORIGIN", "http://localhost:3000"),  # Default to localhost if not set
-        "https://your-production-domain.com",  # Add your production domain here
+        "https://ai-prompt-tools-full.vercel.app/",  # Add your production domain here
     ],  
     allow_credentials=True,
     allow_methods=["*"],
