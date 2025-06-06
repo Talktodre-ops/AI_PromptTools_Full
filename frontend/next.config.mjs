@@ -9,6 +9,10 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  // Optimize for server-side rendering with client components
+  experimental: {
+    appDir: true,
+  },
 }
 
 export default nextConfig

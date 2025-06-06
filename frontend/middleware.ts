@@ -1,3 +1,6 @@
+// For static exports, we'll use client-side redirects instead of middleware
+// This file will be ignored during static export builds
+
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 

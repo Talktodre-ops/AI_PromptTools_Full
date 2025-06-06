@@ -1,7 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Suspense } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import type { Prompt } from "@/types"
 import PromptForm from "@/components/prompt-form"
@@ -11,7 +10,8 @@ import { Toaster } from "@/components/ui/toaster"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
 
-export default function Home() {
+// Client component that uses useSearchParams
+function PageContent() {
   const [results, setResults] = useState<Prompt[]>([])
   const [hasStarted, setHasStarted] = useState(false)
   const searchParams = useSearchParams()
@@ -132,5 +132,23 @@ export default function Home() {
       </div>
       <Toaster />
     </main>
+  )
+}
+
+// Main page component with Suspense boundary
+export default function Page() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-4">Loading...</h1>
+          <div className="w-48 h-1 bg-slate-200 dark:bg-slate-700 rounded-full mx-auto overflow-hidden">
+            <div className="bg-indigo-500 h-full animate-progress"></div>
+          </div>
+        </div>
+      </div>
+    }>
+      <PageContent />
+    </Suspense>
   )
 }
