@@ -7,10 +7,61 @@ import PromptForm from "@/components/prompt-form"
 import PromptResults from "@/components/prompt-results"
 import WelcomePage from "@/components/welcome-page"
 import { Toaster } from "@/components/ui/toaster"
+import { Button } from "@/components/ui/button"
+import { ArrowLeft } from "lucide-react"
 
 export default function Home() {
   const [results, setResults] = useState<Prompt[]>([])
   const [hasStarted, setHasStarted] = useState(false)
+
+  // Load state from localStorage on initial render
+  useEffect(() => {
+    // Check if we're in the browser environment
+    if (typeof window !== 'undefined') {
+      // Load hasStarted state
+      const savedHasStarted = localStorage.getItem('hasStarted')
+      if (savedHasStarted === 'true') {
+        setHasStarted(true)
+      }
+
+      // Load results if they exist
+      const savedResults = localStorage.getItem('promptResults')
+      if (savedResults) {
+        try {
+          const parsedResults = JSON.parse(savedResults)
+          setResults(parsedResults)
+        } catch (e) {
+          console.error('Error parsing saved results:', e)
+        }
+      }
+    }
+  }, [])
+
+  // Save state to localStorage whenever it changes
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('hasStarted', hasStarted.toString())
+    }
+  }, [hasStarted])
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && results.length > 0) {
+      localStorage.setItem('promptResults', JSON.stringify(results))
+    }
+  }, [results])
+
+  // Handle browser back button
+  useEffect(() => {
+    const handlePopState = () => {
+      // If the user presses back and they're on the prompt page, go back to welcome
+      if (hasStarted) {
+        setHasStarted(false)
+      }
+    }
+
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [hasStarted])
 
   // Debug results changes with useEffect instead of inline console.log
   useEffect(() => {
@@ -22,15 +73,39 @@ export default function Home() {
     setResults(newResults)
   }
 
+  const handleStart = () => {
+    setHasStarted(true)
+    // Add a history entry so back button works
+    window.history.pushState({ page: 'prompt' }, '', '/prompt')
+  }
+
+  const handleBack = () => {
+    setHasStarted(false)
+    // Update history
+    window.history.pushState({ page: 'welcome' }, '', '/')
+  }
+
   if (!hasStarted) {
-    return <WelcomePage onStart={() => setHasStarted(true)} />
+    return <WelcomePage onStart={handleStart} />
   }
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
       <div className="container mx-auto px-4 py-4 md:py-12 max-w-5xl">
+        {/* Back button */}
+        <div className="mb-4">
+          <Button 
+            variant="ghost" 
+            onClick={handleBack}
+            className="flex items-center text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Welcome
+          </Button>
+        </div>
+        
         {/* Reduced top padding for mobile and adjusted spacing */}
-        <header className="mb-6 md:mb-8 text-center space-y-3 pt-8 md:pt-12">
+        <header className="mb-6 md:mb-8 text-center space-y-3 pt-4 md:pt-8">
           <h1 className="text-2xl md:text-4xl font-bold text-slate-800 dark:text-slate-100">
             Prompt Engineer
           </h1>

@@ -1,18 +1,15 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
-import { fetchFromApi, type PromptResponse, type PromptRequest } from "@/lib/api"
+import { fetchFromApi, type PromptResponse, type PromptRequest, API_URL } from "@/lib/api"
 import type { Prompt } from "@/types"
 import { useToast } from "@/components/ui/use-toast"
 import { cleanPromptText } from "@/lib/utils"
-
-// Import API_URL from api.ts
-import { API_URL } from "@/lib/api"
 
 const MODES = [
 	{ value: "basic", label: "Basic" },
@@ -58,6 +55,28 @@ export default function PromptForm({ onResults }: Props) {
 		persona: "none",
 		return_format: "plain",  // Changed from format to return_format
 	})
+
+	// Load saved form data from localStorage on component mount
+	useEffect(() => {
+		if (typeof window !== 'undefined') {
+			const savedFormData = localStorage.getItem('promptFormData')
+			if (savedFormData) {
+				try {
+					const parsedFormData = JSON.parse(savedFormData)
+					setFormData(parsedFormData)
+				} catch (e) {
+					console.error('Error parsing saved form data:', e)
+				}
+			}
+		}
+	}, [])
+
+	// Save form data to localStorage whenever it changes
+	useEffect(() => {
+		if (typeof window !== 'undefined') {
+			localStorage.setItem('promptFormData', JSON.stringify(formData))
+		}
+	}, [formData])
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault()
@@ -109,6 +128,14 @@ export default function PromptForm({ onResults }: Props) {
 		}
 	}
 
+	// Update form data when a field changes
+	const updateFormData = (field: keyof PromptRequest, value: string) => {
+		setFormData(prev => ({
+			...prev,
+			[field]: value
+		}))
+	}
+
 	return (
 		<Card className="p-6">
 			<form onSubmit={handleSubmit} className="space-y-6">
@@ -119,7 +146,7 @@ export default function PromptForm({ onResults }: Props) {
 						id="prompt-input"
 						placeholder="Enter your idea, question, or task here. Be as specific as possible."
 						value={formData.raw_input}
-						onChange={(e) => setFormData({ ...formData, raw_input: e.target.value })}
+						onChange={(e) => updateFormData('raw_input', e.target.value)}
 						className="min-h-[200px] resize-y text-base"
 					/>
 				</div>
@@ -129,7 +156,7 @@ export default function PromptForm({ onResults }: Props) {
 						<Label>Mode</Label>
 						<Select
 							value={formData.mode}
-							onValueChange={(value) => setFormData({ ...formData, mode: value })}
+							onValueChange={(value) => updateFormData('mode', value)}
 						>
 							<SelectTrigger>
 								<SelectValue placeholder="Select mode" />
@@ -148,7 +175,7 @@ export default function PromptForm({ onResults }: Props) {
 						<Label>Tone</Label>
 						<Select
 							value={formData.tone}
-							onValueChange={(value) => setFormData({ ...formData, tone: value })}
+							onValueChange={(value) => updateFormData('tone', value)}
 						>
 							<SelectTrigger>
 								<SelectValue placeholder="Select tone" />
@@ -167,7 +194,7 @@ export default function PromptForm({ onResults }: Props) {
 						<Label>Persona</Label>
 						<Select
 							value={formData.persona}
-							onValueChange={(value) => setFormData({ ...formData, persona: value })}
+							onValueChange={(value) => updateFormData('persona', value)}
 						>
 							<SelectTrigger>
 								<SelectValue placeholder="Select persona" />
@@ -186,7 +213,7 @@ export default function PromptForm({ onResults }: Props) {
 						<Label>Output Format</Label>
 						<Select
 							value={formData.return_format}
-							onValueChange={(value) => setFormData({ ...formData, return_format: value })}
+							onValueChange={(value) => updateFormData('return_format', value)}
 						>
 							<SelectTrigger>
 								<SelectValue placeholder="Select format" />

@@ -36,11 +36,22 @@ export default function WelcomePage({ onStart }: WelcomePageProps) {
     setIsVisible(true)
     const handleScroll = () => setScrollY(window.scrollY)
     window.addEventListener("scroll", handleScroll)
+    
+    // Set initial history state if not already set
+    if (history.state === null) {
+      window.history.replaceState({ page: 'welcome' }, '', '/')
+    }
+    
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
   const scrollToExamples = () => {
     examplesRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }
+
+  const handleStart = () => {
+    // Call the onStart prop from parent component
+    onStart()
   }
 
   const features = [
@@ -142,7 +153,7 @@ Use a tone that creates urgency without inducing despair, and include credible d
 
               {/* Buttons - Already responsive, but adjusted padding */}
               <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center px-4 sm:px-0">
-                <div onClick={onStart} className="cursor-pointer">
+                <div onClick={handleStart} className="cursor-pointer">
                   <Button
                     size="lg"
                     className="w-full sm:w-auto px-8 sm:px-10 py-4 sm:py-6 text-lg sm:text-xl font-semibold bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 transform hover:scale-105 transition-all duration-300 shadow-2xl border-0"
@@ -401,7 +412,7 @@ Use a tone that creates urgency without inducing despair, and include credible d
             Join thousands of users who are already creating more effective AI prompts. Start transforming your ideas
             today.
           </p>
-          <div onClick={onStart} className="cursor-pointer">
+          <div onClick={handleStart} className="cursor-pointer">
             <Button
               size="lg"
               variant="secondary"
