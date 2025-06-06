@@ -107,12 +107,25 @@
   }
 }
 
+@keyframes progress {
+  0% {
+    width: 0%;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
 .animate-blob {
   animation: blob 7s infinite;
 }
 
 .animate-gradient-x {
   animation: gradient-x 3s ease infinite;
+}
+
+.animate-progress {
+  animation: progress 2s linear forwards;
 }
 
 .animation-delay-2000 {

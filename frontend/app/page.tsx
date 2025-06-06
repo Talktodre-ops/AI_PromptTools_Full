@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Suspense } from "react"
+import { useSearchParams, useRouter } from "next/navigation"
 import type { Prompt } from "@/types"
 import PromptForm from "@/components/prompt-form"
 import PromptResults from "@/components/prompt-results"
@@ -13,15 +14,32 @@ import { ArrowLeft } from "lucide-react"
 export default function Home() {
   const [results, setResults] = useState<Prompt[]>([])
   const [hasStarted, setHasStarted] = useState(false)
+  const searchParams = useSearchParams()
+  const router = useRouter()
+
+  // Check URL parameters on initial load
+  useEffect(() => {
+    const view = searchParams.get('view')
+    if (view === 'prompt') {
+      setHasStarted(true)
+    }
+  }, [searchParams])
 
   // Load state from localStorage on initial render
   useEffect(() => {
     // Check if we're in the browser environment
     if (typeof window !== 'undefined') {
-      // Load hasStarted state
-      const savedHasStarted = localStorage.getItem('hasStarted')
-      if (savedHasStarted === 'true') {
+      // Load hasStarted state from URL first, then localStorage as fallback
+      const view = searchParams.get('view')
+      if (view === 'prompt') {
         setHasStarted(true)
+      } else {
+        const savedHasStarted = localStorage.getItem('hasStarted')
+        if (savedHasStarted === 'true') {
+          setHasStarted(true)
+          // Update URL to match state
+          router.push('/?view=prompt')
+        }
       }
 
       // Load results if they exist
@@ -35,7 +53,7 @@ export default function Home() {
         }
       }
     }
-  }, [])
+  }, [router, searchParams])
 
   // Save state to localStorage whenever it changes
   useEffect(() => {
@@ -50,19 +68,6 @@ export default function Home() {
     }
   }, [results])
 
-  // Handle browser back button
-  useEffect(() => {
-    const handlePopState = () => {
-      // If the user presses back and they're on the prompt page, go back to welcome
-      if (hasStarted) {
-        setHasStarted(false)
-      }
-    }
-
-    window.addEventListener('popstate', handlePopState)
-    return () => window.removeEventListener('popstate', handlePopState)
-  }, [hasStarted])
-
   // Debug results changes with useEffect instead of inline console.log
   useEffect(() => {
     console.log('Current results:', results)
@@ -75,14 +80,14 @@ export default function Home() {
 
   const handleStart = () => {
     setHasStarted(true)
-    // Add a history entry so back button works
-    window.history.pushState({ page: 'prompt' }, '', '/prompt')
+    // Update URL with query parameter instead of path
+    router.push('/?view=prompt')
   }
 
   const handleBack = () => {
     setHasStarted(false)
-    // Update history
-    window.history.pushState({ page: 'welcome' }, '', '/')
+    // Update URL to remove query parameter
+    router.push('/')
   }
 
   if (!hasStarted) {

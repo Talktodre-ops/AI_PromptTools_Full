@@ -37,11 +37,6 @@ export default function WelcomePage({ onStart }: WelcomePageProps) {
     const handleScroll = () => setScrollY(window.scrollY)
     window.addEventListener("scroll", handleScroll)
     
-    // Set initial history state if not already set
-    if (history.state === null) {
-      window.history.replaceState({ page: 'welcome' }, '', '/')
-    }
-    
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
