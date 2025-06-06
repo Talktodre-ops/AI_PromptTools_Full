@@ -15,18 +15,15 @@ export interface PromptResponse {
   refined_prompts: string[]  // Changed to match the API response
 }
 
-const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+// Default to localhost:8000 if environment variable isn't set
+export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 export async function fetchFromApi<T>(
   endpoint: string, 
   options: RequestInit = {}
 ): Promise<T> {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL
-  if (!baseUrl) {
-    throw new Error('API URL not configured')
-  }
-
-  const url = `${baseUrl}${endpoint}`
+  // Use the constant defined above instead of directly accessing process.env
+  const url = `${API_URL}${endpoint}`
   console.log('Fetching from:', url) // Debug log
 
   const response = await fetch(url, {

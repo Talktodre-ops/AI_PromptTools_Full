@@ -11,6 +11,9 @@ import type { Prompt } from "@/types"
 import { useToast } from "@/components/ui/use-toast"
 import { cleanPromptText } from "@/lib/utils"
 
+// Import API_URL from api.ts
+import { API_URL } from "@/lib/api"
+
 const MODES = [
 	{ value: "basic", label: "Basic" },
 	{ value: "quick", label: "Quick" },
@@ -61,6 +64,12 @@ export default function PromptForm({ onResults }: Props) {
 		setIsLoading(true)
 
 		try {
+			// Check if input is empty
+			if (!formData.raw_input.trim()) {
+				throw new Error("Please enter your idea or request");
+			}
+
+			console.log('Sending request to API:', API_URL + '/refine');
 			const response = await fetchFromApi<PromptResponse>('/refine', {
 				method: 'POST',
 				body: JSON.stringify(formData)
@@ -74,12 +83,25 @@ export default function PromptForm({ onResults }: Props) {
 				
 				console.log('Transformed Prompts:', prompts)
 				onResults(prompts)
+			} else {
+				throw new Error("No prompts were returned from the API");
 			}
 		} catch (error) {
 			console.error('Form submission error:', error)
+			
+			let errorMessage = "Failed to process prompt";
+			
+			if (error instanceof Error) {
+				if (error.message.includes("404")) {
+					errorMessage = "Cannot connect to the backend API. Please make sure the backend server is running at http://localhost:8000";
+				} else {
+					errorMessage = error.message;
+				}
+			}
+			
 			toast({
 				title: "Error",
-				description: error instanceof Error ? error.message : "Failed to process prompt",
+				description: errorMessage,
 				variant: "destructive"
 			})
 		} finally {

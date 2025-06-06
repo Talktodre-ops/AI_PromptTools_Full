@@ -34,7 +34,7 @@ PROMPT_TEMPLATES = {
 def build_prompt(mode, tone, persona, return_format, raw_input):
     base_prompt = PROMPT_TEMPLATES.get(mode, PROMPT_TEMPLATES["deep"])
     tone_part = f" Use a {tone} tone." if tone and tone != "default" else ""
-    persona_part = f" Write the prompts {persona}." if persona else ""
+    persona_part = f" Write the prompts {persona}." if persona and persona != "none" else ""
     format_part = ""
     if return_format == "markdown":
         format_part = " Format the output in markdown."
