@@ -3,9 +3,46 @@ from dotenv import load_dotenv
 import google.generativeai as genai
 import re
 import json
+import asyncio
+import time
+import traceback
+import hashlib
+from functools import lru_cache
 
 load_dotenv()
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+API_KEY = os.getenv("GEMINI_API_KEY")
+if not API_KEY:
+    print("WARNING: GEMINI_API_KEY environment variable not set!")
+else:
+    genai.configure(api_key=API_KEY)
+
+# Create global model instance for reuse with optimized parameters
+if API_KEY:
+    generation_config = {
+        "temperature": 0.7,       # Lower temperature for more deterministic outputs
+        "top_p": 0.95,            # Slightly more deterministic token selection
+        "top_k": 40,              # More focused token selection
+        "max_output_tokens": 1024, # Reasonable limit for outputs
+    }
+    
+    GEMINI_MODEL = genai.GenerativeModel(
+        "models/gemini-2.0-flash",
+        generation_config=generation_config
+    )
+else:
+    GEMINI_MODEL = None
+
+# Maximum time to wait for Gemini API response in seconds
+MAX_API_TIMEOUT = 60  # Increased from 30 to 60 seconds
+
+# Simple in-memory cache for API responses
+response_cache = {}
+CACHE_TTL = 3600  # Cache time-to-live in seconds (1 hour)
+
+def get_cache_key(prompt, mode):
+    """Generate a cache key from the prompt and mode"""
+    key_string = f"{prompt}:{mode}"
+    return hashlib.md5(key_string.encode()).hexdigest()
 
 PROMPT_TEMPLATES = {
     "basic": (
@@ -69,25 +106,57 @@ async def generate_refined_prompts(
     persona: str = "",
     return_format: str = "plain"
 ):
-    model = genai.GenerativeModel("models/gemini-2.0-flash")
+    if not API_KEY or not GEMINI_MODEL:
+        return ["Error: Gemini API key not configured. Please check your environment variables."]
+    
+    start_time = time.time()
+    
     try:
         prompt = build_prompt(mode, tone, persona, return_format, raw_input)
-        response = model.generate_content(prompt)
-        text = response.text.strip()
-
+        print(f"Sending prompt to Gemini API (mode: {mode}, length: {len(prompt)})")
+        
+        # Check cache first
+        cache_key = get_cache_key(prompt, mode)
+        if cache_key in response_cache:
+            cache_entry = response_cache[cache_key]
+            # Check if cache entry is still valid
+            if time.time() - cache_entry["timestamp"] < CACHE_TTL:
+                print(f"Cache hit for prompt (mode: {mode})")
+                return cache_entry["response"]
+            else:
+                # Remove expired cache entry
+                del response_cache[cache_key]
+        
+        # Use async version of generate_content with timeout
+        try:
+            # Create a task for the API call
+            api_task = asyncio.create_task(GEMINI_MODEL.generate_content_async(prompt))
+            
+            # Wait for the task to complete with a timeout
+            response = await asyncio.wait_for(api_task, timeout=MAX_API_TIMEOUT)
+            
+            elapsed = time.time() - start_time
+            print(f"Gemini API response received in {elapsed:.2f} seconds")
+            
+            text = response.text.strip()
+        except asyncio.TimeoutError:
+            elapsed = time.time() - start_time
+            print(f"Gemini API timeout after {elapsed:.2f} seconds")
+            return ["Sorry, the request timed out. Please try again with a shorter prompt or simpler request."]
+        
+        result = None
         if return_format == "json":
             try:
                 # Try to parse as JSON object or array
-                return json.loads(text)
-            except Exception:
+                result = json.loads(text)
+            except Exception as e:
+                print(f"JSON parsing error: {str(e)}")
                 # Fallback: return as single string
-                return [text]
-
-        if mode in ["basic", "quick"]:
+                result = [text]
+        elif mode in ["basic", "quick"]:
             # Extract lines or bullet points
             lines = re.findall(r"^(?:[-*]\s*)?(.*\S.*)$", text, re.MULTILINE)
-            prompts = [l.strip() for l in lines if l.strip() and not l.lower().startswith("prompt")]
-            return prompts
+            result = [l.strip() for l in lines if l.strip() and not l.lower().startswith("prompt")]
         elif mode == "deep":
             # First, try to extract variants with or without asterisks
             variants = re.findall(
@@ -98,20 +167,30 @@ async def generate_refined_prompts(
             
             if not variants:
                 # If no variants found, return the cleaned text
-                return [clean_markdown_text(text)]
-            
-            # Clean each variant and format properly
-            cleaned_variants = []
-            for variant_num, variant_content in variants:
-                if variant_content.strip():
-                    variant_text = f"Variant {variant_num}:{variant_content}"
-                    cleaned_variant = clean_markdown_text(variant_text)
-                    cleaned_variants.append(cleaned_variant)
-            
-            return cleaned_variants if cleaned_variants else [clean_markdown_text(text)]
+                result = [clean_markdown_text(text)]
+            else:
+                # Clean each variant and format properly
+                cleaned_variants = []
+                for variant_num, variant_content in variants:
+                    if variant_content.strip():
+                        variant_text = f"Variant {variant_num}:{variant_content}"
+                        cleaned_variant = clean_markdown_text(variant_text)
+                        cleaned_variants.append(cleaned_variant)
+                
+                result = cleaned_variants if cleaned_variants else [clean_markdown_text(text)]
         else:
             # For few-shot and cot, clean and return the full text
-            return [clean_markdown_text(text)]
+            result = [clean_markdown_text(text)]
+        
+        # Cache the result
+        response_cache[cache_key] = {
+            "response": result,
+            "timestamp": time.time()
+        }
+        
+        return result
     except Exception as e:
-        print("Error in Gemini service:", e)
-        return ["Sorry, something went wrong generating your prompt. Please try again."]
+        elapsed = time.time() - start_time
+        print(f"Error in Gemini service after {elapsed:.2f} seconds: {str(e)}")
+        print(traceback.format_exc())
+        return [f"Sorry, something went wrong generating your prompt: {str(e)}. Please try again."]
