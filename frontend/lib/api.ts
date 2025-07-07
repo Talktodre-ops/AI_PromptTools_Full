@@ -11,6 +11,26 @@ export interface PromptRequest {
   return_format: string  // Changed from format to match your form data
 }
 
+export interface VideoPromptRequest {
+  raw_input: string
+  camera_angle: string
+  lighting: string
+  movement: string
+  style: string
+  tone: string
+  return_format: string
+  // Enhanced fields
+  tool_type?: string
+  quality?: string
+  commercial_type?: string
+  context_details?: string
+}
+
+export interface QuickVideoPromptRequest {
+  raw_input: string
+  template_type: string
+}
+
 export interface PromptResponse {
   refined_prompts: string[]  // Changed to match the API response
 }

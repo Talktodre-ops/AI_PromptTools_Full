@@ -7,9 +7,9 @@ import { ThemeProvider } from "@/components/theme-provider"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Prompt Engineer - Transform Messy Thoughts into Perfect AI Prompts",
+  title: "PROMPTHERO - Transform Messy Thoughts into Perfect AI Prompts",
   description:
-    "AI-powered prompt engineering tool that transforms your rough ideas into high-quality, ready-to-use prompts. Improve AI output quality by 3-5x with our Quick, Deep, Few-Shot, and Chain-of-Thought modes.",
+    "AI-powered prompt engineering tool that transforms your rough ideas into high-quality, ready-to-use prompts. Improve AI output quality by 3-5x with our Quick, Deep, Few-Shot, Chain-of-Thought, and Video modes.",
   keywords: [
     "prompt engineering",
     "AI prompts",
@@ -19,31 +19,33 @@ export const metadata: Metadata = {
     "artificial intelligence",
     "machine learning",
     "prompt generator",
+    "video prompts",
+    "AI video generation",
   ],
-  authors: [{ name: "Prompt Engineer Team" }],
-  creator: "Prompt Engineer",
-  publisher: "Prompt Engineer",
+  authors: [{ name: "PROMPTHERO Team" }],
+  creator: "PROMPTHERO",
+  publisher: "PROMPTHERO",
   formatDetection: {
     email: false,
     address: false,
     telephone: false,
   },
-  metadataBase: new URL("https://prompt-engineer.app"),
+  metadataBase: new URL("https://prompthero.app"),
   alternates: {
     canonical: "/",
   },
   openGraph: {
-    title: "Prompt Engineer - Transform Messy Thoughts into Perfect AI Prompts",
+    title: "PROMPTHERO - Transform Messy Thoughts into Perfect AI Prompts",
     description:
       "AI-powered prompt engineering tool that transforms your rough ideas into high-quality, ready-to-use prompts. Improve AI output quality by 3-5x.",
-    url: "https://prompt-engineer.app",
-    siteName: "Prompt Engineer",
+    url: "https://prompthero.app",
+    siteName: "PROMPTHERO",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Prompt Engineer - AI Prompt Engineering Tool",
+        alt: "PROMPTHERO - AI Prompt Engineering Tool",
       },
     ],
     locale: "en_US",
@@ -51,11 +53,11 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Prompt Engineer - Transform Messy Thoughts into Perfect AI Prompts",
+    title: "PROMPTHERO - Transform Messy Thoughts into Perfect AI Prompts",
     description:
       "AI-powered prompt engineering tool that transforms your rough ideas into high-quality, ready-to-use prompts.",
     images: ["/og-image.png"],
-    creator: "@promptengineer",
+    creator: "@prompthero",
   },
   robots: {
     index: true,
@@ -90,10 +92,10 @@ export default function RootLayout({
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "WebApplication",
-              name: "Prompt Engineer",
+              name: "PROMPTHERO",
               description:
                 "AI-powered prompt engineering tool that transforms your rough ideas into high-quality, ready-to-use prompts.",
-              url: "https://prompt-engineer.app",
+              url: "https://prompthero.app",
               applicationCategory: "ProductivityApplication",
               operatingSystem: "Web",
               offers: {
@@ -103,7 +105,7 @@ export default function RootLayout({
               },
               creator: {
                 "@type": "Organization",
-                name: "Prompt Engineer Team",
+                name: "PROMPTHERO Team",
               },
             }),
           }}

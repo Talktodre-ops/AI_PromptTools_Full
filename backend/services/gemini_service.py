@@ -1,45 +1,52 @@
 import os
 from dotenv import load_dotenv
-import google.generativeai as genai
+import google.generativeai as genai  # type: ignore
 import re
 import json
 import asyncio
 import time
 import traceback
 import hashlib
-from functools import lru_cache
+from typing import Optional, Dict, Any
 
 load_dotenv()
 API_KEY = os.getenv("GEMINI_API_KEY")
 if not API_KEY:
     print("WARNING: GEMINI_API_KEY environment variable not set!")
 else:
-    genai.configure(api_key=API_KEY)
+    genai.configure(api_key=API_KEY)  # type: ignore
 
 # Create global model instance for reuse with optimized parameters
+GEMINI_MODEL: Optional[Any] = None
 if API_KEY:
-    generation_config = {
-        "temperature": 0.7,       # Lower temperature for more deterministic outputs
-        "top_p": 0.95,            # Slightly more deterministic token selection
-        "top_k": 40,              # More focused token selection
-        "max_output_tokens": 1024, # Reasonable limit for outputs
-    }
-    
-    GEMINI_MODEL = genai.GenerativeModel(
-        "models/gemini-2.0-flash",
-        generation_config=generation_config
-    )
-else:
-    GEMINI_MODEL = None
+    try:
+        # Use dictionary-based configuration for better compatibility
+        generation_config: Dict[str, Any] = {
+            "temperature": 0.7,       # Lower temperature for more deterministic outputs
+            "top_p": 0.95,            # Slightly more deterministic token selection
+            "top_k": 40,              # More focused token selection
+            "max_output_tokens": 1024, # Reasonable limit for outputs
+        }
+        
+        # Create model with generation config - suppress type checking for google.generativeai module
+        GEMINI_MODEL = genai.GenerativeModel(  # type: ignore
+            "models/gemini-2.0-flash"
+        )
+        # Set generation config separately if needed
+        if hasattr(GEMINI_MODEL, '_generation_config'):
+            GEMINI_MODEL._generation_config = generation_config  # type: ignore
+    except Exception as e:
+        print(f"Error creating Gemini model: {e}")
+        GEMINI_MODEL = None
 
 # Maximum time to wait for Gemini API response in seconds
 MAX_API_TIMEOUT = 60  # Increased from 30 to 60 seconds
 
 # Simple in-memory cache for API responses
-response_cache = {}
+response_cache: Dict[str, Dict[str, Any]] = {}
 CACHE_TTL = 3600  # Cache time-to-live in seconds (1 hour)
 
-def get_cache_key(prompt, mode):
+def get_cache_key(prompt: str, mode: str) -> str:
     """Generate a cache key from the prompt and mode"""
     key_string = f"{prompt}:{mode}"
     return hashlib.md5(key_string.encode()).hexdigest()
@@ -67,6 +74,130 @@ PROMPT_TEMPLATES = {
         "Rewrite this input as a prompt for an AI assistant that encourages chain-of-thought reasoning. "
         "Include instructions for the AI to explain its reasoning step by step before giving a final answer.{tone_part}{persona_part}{format_part}"
     ),
+    "video": (
+        "You are an expert at writing highly detailed prompts for AI video generation tools like Runway, Sora, or Pika. "
+        "Rewrite this input into 2-3 detailed cinematic video generation prompt variants. "
+        "Label each variant clearly as 'Variant 1:', 'Variant 2:', etc., at the start of each (without asterisks). "
+        "Each variant should be optimized for AI video generation tools and include: "
+        "- Specific camera angles and movements "
+        "- Detailed lighting and atmosphere "
+        "- Visual style and cinematic elements "
+        "- Professional video terminology "
+        "- Duration and quality specifications "
+        "Focus on creating ready-to-use prompts that will generate high-quality video outputs.{tone_part}{persona_part}{format_part}"
+    ),
+}
+
+# Enhanced video prompt templates for different tools and use cases
+VIDEO_PROMPT_TEMPLATES = {
+    "runway": {
+        "template": (
+            "Create a professional video prompt optimized for Runway ML. "
+            "Include specific technical details like camera movements, lighting setups, and visual effects. "
+            "Use Runway-specific terminology and formatting. "
+            "Focus on realistic motion and cinematic quality."
+        ),
+        "style_modifiers": {
+            "cinematic": "cinematic color grading, film grain, professional cinematography",
+            "commercial": "polished commercial style, bright lighting, clean composition",
+            "documentary": "natural documentary style, handheld camera feel, authentic lighting",
+            "music-video": "dynamic editing style, creative camera angles, artistic visual effects",
+            "social": "vertical format optimized, engaging quick cuts, social media friendly"
+        }
+    },
+    "pika": {
+        "template": (
+            "Create a video prompt optimized for Pika Labs. "
+            "Focus on artistic and creative elements, unique visual styles, and experimental techniques. "
+            "Use Pika-specific formatting and emphasis on creative motion."
+        ),
+        "style_modifiers": {
+            "artistic": "artistic interpretation, creative visual effects, unique perspective",
+            "animated": "smooth animation style, vibrant colors, stylized movement",
+            "experimental": "experimental visual techniques, creative transitions, innovative style",
+            "retro": "vintage aesthetic, retro color palette, nostalgic atmosphere",
+            "fantasy": "magical elements, fantastical lighting, dreamy atmosphere"
+        }
+    },
+    "sora": {
+        "template": (
+            "Create a video prompt optimized for OpenAI's Sora. "
+            "Focus on narrative storytelling, complex scenes, and realistic motion. "
+            "Use detailed scene descriptions and emotional context. "
+            "Emphasize photorealistic quality and natural movement."
+        ),
+        "style_modifiers": {
+            "photorealistic": "photorealistic quality, natural lighting, realistic physics",
+            "narrative": "storytelling elements, character development, emotional depth",
+            "architectural": "architectural focus, structural details, spatial composition",
+            "nature": "natural environment, organic movement, environmental storytelling",
+            "urban": "urban setting, city atmosphere, modern aesthetic"
+        }
+    }
+}
+
+# Commercial and marketing templates
+COMMERCIAL_TEMPLATES = {
+    "product_showcase": (
+        "Create a product showcase video prompt featuring {product_details}. "
+        "Include smooth product rotation, elegant lighting, and premium aesthetic. "
+        "Focus on highlighting key features and creating desire."
+    ),
+    "brand_story": (
+        "Create a brand storytelling video prompt for {brand_context}. "
+        "Include emotional connection, authentic moments, and brand values. "
+        "Focus on lifestyle integration and aspirational content."
+    ),
+    "social_media": (
+        "Create a social media video prompt for {platform_context}. "
+        "Include platform-specific formatting, engaging hooks, and viral potential. "
+        "Focus on quick engagement and shareability."
+    ),
+    "explainer": (
+        "Create an explainer video prompt for {concept_details}. "
+        "Include clear visual metaphors, step-by-step progression, and educational elements. "
+        "Focus on clarity and viewer understanding."
+    )
+}
+
+# Cinematic building blocks
+CINEMATIC_ELEMENTS = {
+    "camera_movements": {
+        "static": "static camera, stable composition, fixed perspective",
+        "pan": "smooth panning motion, horizontal movement, cinematic sweep",
+        "tilt": "vertical tilt movement, revealing composition, dynamic perspective",
+        "zoom": "smooth zoom transition, focal length change, dramatic emphasis",
+        "dolly": "dolly movement, depth change, cinematic approach",
+        "tracking": "tracking shot, following subject, dynamic movement",
+        "crane": "crane shot, vertical movement, establishing perspective",
+        "aerial": "aerial perspective, drone-like movement, sweeping overview"
+    },
+    "lighting_setups": {
+        "natural": "natural lighting, soft shadows, organic feel",
+        "golden_hour": "golden hour lighting, warm tones, magical atmosphere",
+        "blue_hour": "blue hour lighting, cool tones, dramatic sky",
+        "studio": "controlled studio lighting, professional setup, clean shadows",
+        "low_key": "low key lighting, dramatic shadows, high contrast",
+        "high_key": "high key lighting, bright and airy, minimal shadows",
+        "backlit": "backlit subject, rim lighting, dramatic silhouette",
+        "neon": "neon lighting, vibrant colors, urban nighttime aesthetic"
+    },
+    "visual_styles": {
+        "cinematic": "cinematic color grading, film grain, professional cinematography, 2.35:1 aspect ratio",
+        "documentary": "documentary style, handheld camera feel, natural color palette, authentic atmosphere",
+        "commercial": "polished commercial style, bright lighting, clean composition, premium aesthetic",
+        "music_video": "dynamic editing style, creative camera angles, artistic visual effects, rhythmic pacing",
+        "vintage": "vintage aesthetic, retro color palette, film grain, nostalgic atmosphere",
+        "modern": "modern aesthetic, clean lines, contemporary style, sleek presentation",
+        "artistic": "artistic interpretation, creative visual effects, unique perspective, experimental techniques"
+    },
+    "quality_specs": {
+        "4k": "4K UHD resolution, ultra-high definition, crystal clear quality",
+        "cinematic": "cinematic depth of field, professional color grading, film-like quality",
+        "hdr": "HDR quality, enhanced dynamic range, vibrant colors",
+        "film_grain": "subtle film grain, organic texture, authentic film look",
+        "smooth": "smooth motion, high frame rate, fluid movement"
+    }
 }
 
 def build_prompt(mode, tone, persona, return_format, raw_input):
@@ -194,3 +325,51 @@ async def generate_refined_prompts(
         print(f"Error in Gemini service after {elapsed:.2f} seconds: {str(e)}")
         print(traceback.format_exc())
         return [f"Sorry, something went wrong generating your prompt: {str(e)}. Please try again."]
+
+def build_video_prompt(tool_type, style, camera_movement, lighting, quality, raw_input, tone="default"):
+    """Build enhanced video prompts with tool-specific optimization"""
+    
+    # Get base template for the tool
+    tool_template = VIDEO_PROMPT_TEMPLATES.get(tool_type, VIDEO_PROMPT_TEMPLATES["runway"])
+    
+    # Build cinematic elements
+    camera_element = CINEMATIC_ELEMENTS["camera_movements"].get(camera_movement, "smooth camera movement")
+    lighting_element = CINEMATIC_ELEMENTS["lighting_setups"].get(lighting, "natural lighting")
+    style_element = CINEMATIC_ELEMENTS["visual_styles"].get(style, "cinematic style")
+    quality_element = CINEMATIC_ELEMENTS["quality_specs"].get(quality, "high quality")
+    
+    # Combine elements
+    enhanced_prompt = f"""
+    {tool_template["template"]}
+    
+    Scene Description: {raw_input}
+    
+    Technical Specifications:
+    - Camera: {camera_element}
+    - Lighting: {lighting_element}
+    - Style: {style_element}
+    - Quality: {quality_element}
+    
+    Create 2-3 detailed prompt variants optimized for {tool_type.title()} that incorporate these elements.
+    Each variant should be a complete, ready-to-use prompt.
+    """
+    
+    return enhanced_prompt.strip()
+
+def build_commercial_prompt(template_type, context_details, raw_input):
+    """Build commercial video prompts"""
+    
+    template = COMMERCIAL_TEMPLATES.get(template_type, COMMERCIAL_TEMPLATES["product_showcase"])
+    
+    if template_type == "product_showcase":
+        enhanced_prompt = template.format(product_details=context_details)
+    elif template_type == "brand_story":
+        enhanced_prompt = template.format(brand_context=context_details)
+    elif template_type == "social_media":
+        enhanced_prompt = template.format(platform_context=context_details)
+    elif template_type == "explainer":
+        enhanced_prompt = template.format(concept_details=context_details)
+    else:
+        enhanced_prompt = template
+    
+    return f"{enhanced_prompt}\n\nScene Description: {raw_input}"

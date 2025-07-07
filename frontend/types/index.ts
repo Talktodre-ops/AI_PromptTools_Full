@@ -27,3 +27,33 @@ export interface PromptRequest {
   persona: string;
   return_format: string;
 }
+
+export interface MarketplaceTemplate {
+  id: string
+  title: string
+  description: string
+  content: string
+  category: string
+  mode: string
+  tags: string[]
+  author: string
+  authorAvatar: string
+  rating: number
+  ratingCount: number
+  downloads: number
+  likes: number
+  views: number
+  createdAt: string
+  isLiked: boolean
+  isPremium: boolean
+}
+
+export interface MarketplaceStats {
+  totalTemplates: number
+  totalDownloads: number
+  totalLikes: number
+  totalViews: number
+  averageRating: number
+  activeContributors: number
+  categoryCounts: Record<string, number>
+}

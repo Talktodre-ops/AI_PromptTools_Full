@@ -2,13 +2,14 @@
 
 import { useState, useEffect, Suspense } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
+import Link from "next/link"
 import type { Prompt } from "@/types"
 import PromptForm from "@/components/prompt-form"
 import PromptResults from "@/components/prompt-results"
 import WelcomePage from "@/components/welcome-page"
 import { Toaster } from "@/components/ui/toaster"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, Film } from "lucide-react"
 
 // Client component that uses useSearchParams
 function PageContent() {
@@ -97,8 +98,8 @@ function PageContent() {
   return (
     <main className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
       <div className="container mx-auto px-4 py-4 md:py-12 max-w-5xl">
-        {/* Back button */}
-        <div className="mb-4">
+        {/* Navigation */}
+        <div className="mb-4 flex justify-between items-center">
           <Button 
             variant="ghost" 
             onClick={handleBack}
@@ -107,12 +108,41 @@ function PageContent() {
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Welcome
           </Button>
+          
+          <div className="flex items-center gap-2">
+            <Link href="/history">
+              <Button variant="outline" className="flex items-center">
+                History
+              </Button>
+            </Link>
+            <Link href="/marketplace">
+              <Button variant="outline" className="flex items-center">
+                Marketplace
+              </Button>
+            </Link>
+            <Link href="/analytics">
+              <Button variant="outline" className="flex items-center">
+                Analytics
+              </Button>
+            </Link>
+            <Link href="/pricing">
+              <Button variant="outline" className="flex items-center">
+                Pricing
+              </Button>
+            </Link>
+            <Link href="/video-prompt">
+              <Button variant="outline" className="flex items-center">
+                <Film className="mr-2 h-4 w-4" />
+                Switch to Video Prompts
+              </Button>
+            </Link>
+          </div>
         </div>
         
         {/* Reduced top padding for mobile and adjusted spacing */}
         <header className="mb-6 md:mb-8 text-center space-y-3 pt-4 md:pt-8">
           <h1 className="text-2xl md:text-4xl font-bold text-slate-800 dark:text-slate-100">
-            Prompt Engineer
+            PROMPTHERO
           </h1>
           <p className="text-sm md:text-lg text-slate-600 dark:text-slate-400 max-w-xl mx-auto leading-relaxed">
             Transform your messy thoughts into high-quality, ready-to-use AI prompts

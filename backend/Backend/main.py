@@ -12,10 +12,10 @@ from collections import defaultdict
 
 # Add the parent directory to sys.path to allow imports from sibling directories
 sys.path.append(str(Path(__file__).parent.parent))
-from routers import refine, explain
+from routers import refine, explain, video
 
 app = FastAPI(
-    title="Prompt Engineering API",
+    title="PROMPTHERO API",
     description="API for generating and refining AI prompts",
     version="1.0.0",
 )
@@ -113,6 +113,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 # Include routers
 app.include_router(refine.router)
 app.include_router(explain.router)
+app.include_router(video.router)
 
 # Add a root endpoint for API health check
 @app.get("/")
