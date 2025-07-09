@@ -247,14 +247,14 @@ export default function PricingPage() {
             </thead>
             <tbody>
               {FEATURE_COMPARISON.map((category) => (
-                <>
-                  <tr key={category.category} className="bg-gray-50">
+                <React.Fragment key={category.category}>
+                  <tr className="bg-gray-50">
                     <td colSpan={4} className="p-4 font-semibold text-gray-700">
                       {category.category}
                     </td>
                   </tr>
                   {category.features.map((feature, index) => (
-                    <tr key={index} className="border-b">
+                    <tr key={`${category.category}-${index}`} className="border-b">
                       <td className="p-4">{feature.name}</td>
                       <td className="text-center p-4">
                         {typeof feature.free === "boolean" ? (
@@ -291,7 +291,7 @@ export default function PricingPage() {
                       </td>
                     </tr>
                   ))}
-                </>
+                </React.Fragment>
               ))}
             </tbody>
           </table>

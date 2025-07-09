@@ -24,6 +24,9 @@ export function cleanPromptText(text: string): string {
   return text
 }
 
+// Development flag - set to true during development to unlock all features
+const IS_DEVELOPMENT = true; // Change to false for production
+
 // Freemium Strategy Implementation
 export interface UsageStats {
   dailyPrompts: number
@@ -43,12 +46,12 @@ export interface UsageLimits {
 }
 
 export const FREE_TIER_LIMITS: UsageLimits = {
-  dailyPrompts: 5,
-  totalPrompts: 50,
-  features: ['basic', 'quick', 'deep'],
+  dailyPrompts: IS_DEVELOPMENT ? -1 : 5,
+  totalPrompts: IS_DEVELOPMENT ? -1 : 50,
+  features: IS_DEVELOPMENT ? ['basic', 'quick', 'deep', 'few-shot', 'cot', 'video'] : ['basic', 'quick', 'deep'],
   canAccessTemplates: true,
-  canAccessVideoPrompts: false,
-  canAccessCommercialTemplates: false
+  canAccessVideoPrompts: IS_DEVELOPMENT ? true : false,
+  canAccessCommercialTemplates: IS_DEVELOPMENT ? true : false
 }
 
 export const PRO_TIER_LIMITS: UsageLimits = {
@@ -111,6 +114,15 @@ export class UsageTracker {
   }
 
   static incrementUsage(): boolean {
+    // During development, always allow usage
+    if (IS_DEVELOPMENT) {
+      const stats = this.getUsageStats()
+      stats.dailyPrompts++
+      stats.totalPrompts++
+      this.saveUsageStats(stats)
+      return true
+    }
+
     const stats = this.getUsageStats()
     const limits = this.getLimitsForTier(stats.userTier)
 
@@ -133,6 +145,11 @@ export class UsageTracker {
   }
 
   static getRemainingUsage(): { daily: number; total: number } {
+    // During development, show unlimited
+    if (IS_DEVELOPMENT) {
+      return { daily: -1, total: -1 }
+    }
+
     const stats = this.getUsageStats()
     const limits = this.getLimitsForTier(stats.userTier)
 
@@ -146,6 +163,11 @@ export class UsageTracker {
   }
 
   static canUseFeature(feature: string): boolean {
+    // During development, allow all features
+    if (IS_DEVELOPMENT) {
+      return true
+    }
+
     const stats = this.getUsageStats()
     const limits = this.getLimitsForTier(stats.userTier)
 
@@ -164,6 +186,11 @@ export class UsageTracker {
   }
 
   static getUsagePercentage(): number {
+    // During development, show 0% (unlimited)
+    if (IS_DEVELOPMENT) {
+      return 0
+    }
+
     const stats = this.getUsageStats()
     const limits = this.getLimitsForTier(stats.userTier)
 
@@ -182,8 +209,8 @@ export class UsageTracker {
       dailyPrompts: 0,
       totalPrompts: 0,
       lastResetDate: new Date().toDateString(),
-      userTier: 'free',
-      features: FREE_TIER_LIMITS.features
+      userTier: IS_DEVELOPMENT ? 'pro' : 'free', // Set to Pro during development
+      features: IS_DEVELOPMENT ? PRO_TIER_LIMITS.features : FREE_TIER_LIMITS.features
     }
   }
 }

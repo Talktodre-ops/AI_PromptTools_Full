@@ -16,10 +16,14 @@ if not API_KEY:
 else:
     genai.configure(api_key=API_KEY)  # type: ignore
 
-# Create global model instance for reuse with optimized parameters
+# Create global model instances for different purposes
 GEMINI_MODEL: Optional[Any] = None
+GEMINI_VIDEO_MODEL: Optional[Any] = None  # Specialized model for video prompts
+
 if API_KEY:
     try:
+        print(f"Attempting to create Gemini models with API key: {API_KEY[:10]}...")
+        
         # Use dictionary-based configuration for better compatibility
         generation_config: Dict[str, Any] = {
             "temperature": 0.7,       # Lower temperature for more deterministic outputs
@@ -28,16 +32,44 @@ if API_KEY:
             "max_output_tokens": 1024, # Reasonable limit for outputs
         }
         
-        # Create model with generation config - suppress type checking for google.generativeai module
+        # Video-specific configuration for more creative and detailed responses
+        video_generation_config: Dict[str, Any] = {
+            "temperature": 0.8,       # Higher temperature for more creativity
+            "top_p": 0.9,            # More diverse token selection for creative prompts
+            "top_k": 50,              # Broader token selection
+            "max_output_tokens": 2048, # More tokens for detailed video prompts
+        }
+        
+        # Create main text model (gemini-2.0-flash)
         GEMINI_MODEL = genai.GenerativeModel(  # type: ignore
             "models/gemini-2.0-flash"
         )
+        print(f"✅ Successfully created main Gemini model: {GEMINI_MODEL}")
+        
+        # Create specialized video model (gemini-1.5-flash for better creative video understanding)
+        try:
+            GEMINI_VIDEO_MODEL = genai.GenerativeModel(  # type: ignore
+                "models/gemini-1.5-flash"  # Better for creative/visual tasks and free tier
+            )
+            print(f"✅ Successfully created video Gemini model: {GEMINI_VIDEO_MODEL}")
+        except Exception as video_error:
+            print(f"⚠️ Failed to create video model, falling back to main model: {video_error}")
+            GEMINI_VIDEO_MODEL = GEMINI_MODEL
+        
         # Set generation config separately if needed
         if hasattr(GEMINI_MODEL, '_generation_config'):
             GEMINI_MODEL._generation_config = generation_config  # type: ignore
+        if hasattr(GEMINI_VIDEO_MODEL, '_generation_config'):
+            GEMINI_VIDEO_MODEL._generation_config = video_generation_config  # type: ignore
+            
     except Exception as e:
-        print(f"Error creating Gemini model: {e}")
+        print(f"❌ Error creating Gemini models: {e}")
+        print(f"Exception type: {type(e)}")
+        traceback.print_exc()
         GEMINI_MODEL = None
+        GEMINI_VIDEO_MODEL = None
+else:
+    print("❌ No API key found - GEMINI_MODEL will be None")
 
 # Maximum time to wait for Gemini API response in seconds
 MAX_API_TIMEOUT = 60  # Increased from 30 to 60 seconds
@@ -75,16 +107,34 @@ PROMPT_TEMPLATES = {
         "Include instructions for the AI to explain its reasoning step by step before giving a final answer.{tone_part}{persona_part}{format_part}"
     ),
     "video": (
-        "You are an expert at writing highly detailed prompts for AI video generation tools like Runway, Sora, or Pika. "
-        "Rewrite this input into 2-3 detailed cinematic video generation prompt variants. "
-        "Label each variant clearly as 'Variant 1:', 'Variant 2:', etc., at the start of each (without asterisks). "
-        "Each variant should be optimized for AI video generation tools and include: "
-        "- Specific camera angles and movements "
-        "- Detailed lighting and atmosphere "
-        "- Visual style and cinematic elements "
-        "- Professional video terminology "
-        "- Duration and quality specifications "
-        "Focus on creating ready-to-use prompts that will generate high-quality video outputs.{tone_part}{persona_part}{format_part}"
+        "You are an elite video prompt engineer specializing in AI video generation tools like Runway ML, Sora, and Pika Labs. "
+        "Your expertise lies in crafting hyper-detailed, cinematic prompts that produce stunning video outputs. "
+        
+        "Transform this input into 2-3 comprehensive video generation prompt variants. Each variant must be a complete, "
+        "ready-to-use prompt that includes:\n\n"
+        
+        "🎬 VISUAL COMPOSITION:\n"
+        "- Precise camera angles, movements, and framing\n"
+        "- Detailed lighting setup and atmospheric conditions\n"
+        "- Color palette and visual mood specifications\n"
+        "- Specific shot types (wide, medium, close-up, etc.)\n\n"
+        
+        "🎭 SCENE ELEMENTS:\n"
+        "- Clear subject description and positioning\n"
+        "- Environmental details and setting\n"
+        "- Action sequences and movement patterns\n"
+        "- Timing and pacing instructions\n\n"
+        
+        "⚡ TECHNICAL SPECIFICATIONS:\n"
+        "- Quality settings (4K, HDR, frame rate)\n"
+        "- Visual style and aesthetic direction\n"
+        "- Duration and transition specifications\n"
+        "- Tool-specific optimization keywords\n\n"
+        
+        "Format each variant as 'Variant X:' followed by the complete prompt. "
+        "Make each prompt self-contained and immediately usable in video generation tools. "
+        "Focus on creating prompts that will produce professional, cinematic results that match the user's vision exactly."
+        "{tone_part}{persona_part}{format_part}"
     ),
 }
 
@@ -237,14 +287,27 @@ async def generate_refined_prompts(
     persona: str = "",
     return_format: str = "plain"
 ):
-    if not API_KEY or not GEMINI_MODEL:
+    # Check API key and models
+    if not API_KEY:
         return ["Error: Gemini API key not configured. Please check your environment variables."]
+    
+    # Choose the appropriate model based on mode
+    if mode == "video":
+        if not GEMINI_VIDEO_MODEL:
+            return ["Error: Video model not available. Please check your configuration."]
+        model_to_use = GEMINI_VIDEO_MODEL
+        print(f"Using specialized video model for video prompt generation")
+    else:
+        if not GEMINI_MODEL:
+            return ["Error: Main model not available. Please check your configuration."]
+        model_to_use = GEMINI_MODEL
+        print(f"Using main model for {mode} prompt generation")
     
     start_time = time.time()
     
     try:
         prompt = build_prompt(mode, tone, persona, return_format, raw_input)
-        print(f"Sending prompt to Gemini API (mode: {mode}, length: {len(prompt)})")
+        print(f"Sending prompt to Gemini API (mode: {mode}, model: {'video' if mode == 'video' else 'main'}, length: {len(prompt)})")
         
         # Check cache first
         cache_key = get_cache_key(prompt, mode)
@@ -260,8 +323,8 @@ async def generate_refined_prompts(
         
         # Use async version of generate_content with timeout
         try:
-            # Create a task for the API call
-            api_task = asyncio.create_task(GEMINI_MODEL.generate_content_async(prompt))
+            # Create a task for the API call using the selected model
+            api_task = asyncio.create_task(model_to_use.generate_content_async(prompt))
             
             # Wait for the task to complete with a timeout
             response = await asyncio.wait_for(api_task, timeout=MAX_API_TIMEOUT)
@@ -288,7 +351,7 @@ async def generate_refined_prompts(
             # Extract lines or bullet points
             lines = re.findall(r"^(?:[-*]\s*)?(.*\S.*)$", text, re.MULTILINE)
             result = [l.strip() for l in lines if l.strip() and not l.lower().startswith("prompt")]
-        elif mode == "deep":
+        elif mode in ["deep", "video"]:
             # First, try to extract variants with or without asterisks
             variants = re.findall(
                 r"(?:\*\*)?Variant (\d+)(?:\*\*)?:(.+?)(?=(?:\n(?:\*\*)?Variant \d+(?:\*\*)?:|$))", 
