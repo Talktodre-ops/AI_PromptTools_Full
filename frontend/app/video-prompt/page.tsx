@@ -9,107 +9,78 @@ import PromptResults from "@/components/prompt-results"
 import { Toaster } from "@/components/ui/toaster"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, Film } from "lucide-react"
+import { motion } from "framer-motion"
+import { Card, CardContent } from "@/components/ui/card"
+import { Progress } from "@/components/ui/progress"
 
 export default function VideoPromptPage() {
   const [results, setResults] = useState<Prompt[]>([])
+  const [usage, setUsage] = useState({ daily: 0, total: 0 })
   const router = useRouter()
 
-  // Load results if they exist
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const savedResults = localStorage.getItem('videoPromptResults')
-      if (savedResults) {
-        try {
-          const parsedResults = JSON.parse(savedResults)
-          setResults(parsedResults)
-        } catch (e) {
-          console.error('Error parsing saved results:', e)
-        }
-      }
-    }
+    const savedResults = localStorage.getItem('videoPromptResults')
+    if (savedResults) setResults(JSON.parse(savedResults))
+    // Mock usage
+    setUsage({ daily: 3, total: 45 })
   }, [])
 
-  // Save results to localStorage whenever they change
   useEffect(() => {
-    if (typeof window !== 'undefined' && results.length > 0) {
-      localStorage.setItem('videoPromptResults', JSON.stringify(results))
-    }
+    if (results.length) localStorage.setItem('videoPromptResults', JSON.stringify(results))
   }, [results])
 
-  const handleResults = (newResults: Prompt[]) => {
-    console.log('Setting new video prompt results:', newResults)
-    setResults(newResults)
-  }
-
-  const handleBack = () => {
-    router.push('/')
-  }
+  const handleResults = (newResults: Prompt[]) => setResults(newResults)
+  const handleBack = () => router.push('/')
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
-      <div className="container mx-auto px-4 py-4 md:py-12 max-w-5xl">
-        {/* Navigation links */}
-        <div className="mb-4 flex justify-between items-center">
-          <Button 
-            variant="ghost" 
-            onClick={handleBack}
-            className="flex items-center text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Home
-          </Button>
-          
-          <div className="flex items-center gap-2">
-            <Link href="/history">
-              <Button variant="outline" className="flex items-center">
-                History
-              </Button>
-            </Link>
-            <Link href="/marketplace">
-              <Button variant="outline" className="flex items-center">
-                Marketplace
-              </Button>
-            </Link>
-            <Link href="/analytics">
-              <Button variant="outline" className="flex items-center">
-                Analytics
-              </Button>
-            </Link>
-            <Link href="/pricing">
-              <Button variant="outline" className="flex items-center">
-                Pricing
-              </Button>
-            </Link>
-            <Link href="/prompt">
-              <Button variant="outline" className="flex items-center">
-                Switch to Text Prompts
-              </Button>
-            </Link>
+    <main className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950 dark:to-purple-950">
+      {/* Hero */}
+      <motion.section 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="py-12 text-center bg-gradient-to-r from-rose-600 to-pink-600 text-white"
+      >
+        <h1 className="text-4xl md:text-6xl font-bold mb-4">Video Prompt Generator</h1>
+        <p className="text-xl">Create cinematic AI video prompts</p>
+      </motion.section>
+
+      <div className="w-full p-4 md:p-8">
+        <div className="flex justify-between mb-6">
+          <Button variant="ghost" onClick={handleBack}><ArrowLeft /> Back</Button>
+          <div className="space-x-2">
+            <Link href="/history"><Button>History</Button></Link>
+            <Link href="/marketplace"><Button>Marketplace</Button></Link>
+            <Link href="/analytics"><Button>Analytics</Button></Link>
+            <Link href="/pricing"><Button>Pricing</Button></Link>
+            <Link href="/prompt"><Button>Text Prompts</Button></Link>
           </div>
         </div>
-        
-        {/* Header */}
-        <header className="mb-6 md:mb-8 text-center space-y-3 pt-4 md:pt-8">
-          <div className="flex items-center justify-center gap-2">
-            <Film className="h-6 w-6 md:h-8 md:w-8 text-rose-500" />
-            <h1 className="text-2xl md:text-4xl font-bold text-slate-800 dark:text-slate-100">
-              Video Prompt Generator
-            </h1>
-          </div>
-          <p className="text-sm md:text-lg text-slate-600 dark:text-slate-400 max-w-xl mx-auto leading-relaxed">
-            Create cinematic video prompts optimized for AI video generation tools like Runway, Pika, and Sora
-          </p>
-        </header>
 
-        <div className="grid gap-6 md:gap-8 mt-6 md:mt-8">
-          <VideoPromptForm onResults={handleResults} />
-          <div className="min-h-[100px]">
-            {results.length > 0 ? (
-              <Suspense fallback={<div className="h-32 flex items-center justify-center">Loading results...</div>}>
-                <PromptResults results={results} />
-              </Suspense>
-            ) : null}
-          </div>
+        {/* Usage Dashboard */}
+        <Card className="mb-6">
+          <CardContent className="p-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm text-muted-foreground">Daily Usage</p>
+                <Progress value={(usage.daily / 10) * 100} className="mt-2" />
+                <p className="mt-1">{usage.daily}/10</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Total Usage</p>
+                <Progress value={(usage.total / 100) * 100} className="mt-2" />
+                <p className="mt-1">{usage.total}/100</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="grid md:grid-cols-2 gap-4 md:gap-8">
+          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
+            <VideoPromptForm onResults={handleResults} />
+          </motion.div>
+          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
+            {results.length > 0 && <PromptResults results={results} />}
+          </motion.div>
         </div>
       </div>
       <Toaster />

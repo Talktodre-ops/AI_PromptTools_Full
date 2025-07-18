@@ -10,175 +10,90 @@ import WelcomePage from "@/components/welcome-page"
 import { Toaster } from "@/components/ui/toaster"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, Film } from "lucide-react"
+import { motion } from "framer-motion"
+import { Card, CardContent } from "@/components/ui/card"
+import { Progress } from "@/components/ui/progress"
 
-// Client component that uses useSearchParams
-function PageContent() {
+export default function Page() {
   const [results, setResults] = useState<Prompt[]>([])
   const [hasStarted, setHasStarted] = useState(false)
+  const [usage, setUsage] = useState({ daily: 0, total: 0 })
   const searchParams = useSearchParams()
   const router = useRouter()
 
-  // Check URL parameters on initial load
   useEffect(() => {
+    // Load states
     const view = searchParams.get('view')
-    if (view === 'prompt') {
-      setHasStarted(true)
-    }
+    setHasStarted(view === 'prompt' || localStorage.getItem('hasStarted') === 'true')
+    const savedResults = localStorage.getItem('promptResults')
+    if (savedResults) setResults(JSON.parse(savedResults))
+    // Mock usage
+    setUsage({ daily: 3, total: 45 })
   }, [searchParams])
 
-  // Load state from localStorage on initial render
   useEffect(() => {
-    // Check if we're in the browser environment
-    if (typeof window !== 'undefined') {
-      // Load hasStarted state from URL first, then localStorage as fallback
-      const view = searchParams.get('view')
-      if (view === 'prompt') {
-        setHasStarted(true)
-      } else {
-        const savedHasStarted = localStorage.getItem('hasStarted')
-        if (savedHasStarted === 'true') {
-          setHasStarted(true)
-          // Update URL to match state
-          router.push('/?view=prompt')
-        }
-      }
+    if (hasStarted) router.push('/?view=prompt')
+    localStorage.setItem('hasStarted', hasStarted.toString())
+    if (results.length) localStorage.setItem('promptResults', JSON.stringify(results))
+  }, [hasStarted, results, router])
 
-      // Load results if they exist
-      const savedResults = localStorage.getItem('promptResults')
-      if (savedResults) {
-        try {
-          const parsedResults = JSON.parse(savedResults)
-          setResults(parsedResults)
-        } catch (e) {
-          console.error('Error parsing saved results:', e)
-        }
-      }
-    }
-  }, [router, searchParams])
+  const handleStart = () => setHasStarted(true)
+  const handleBack = () => setHasStarted(false)
 
-  // Save state to localStorage whenever it changes
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('hasStarted', hasStarted.toString())
-    }
-  }, [hasStarted])
-
-  useEffect(() => {
-    if (typeof window !== 'undefined' && results.length > 0) {
-      localStorage.setItem('promptResults', JSON.stringify(results))
-    }
-  }, [results])
-
-  // Debug results changes with useEffect instead of inline console.log
-  useEffect(() => {
-    console.log('Current results:', results)
-  }, [results])
-
-  const handleResults = (newResults: Prompt[]) => {
-    console.log('Setting new results:', newResults)
-    setResults(newResults)
-  }
-
-  const handleStart = () => {
-    setHasStarted(true)
-    // Update URL with query parameter instead of path
-    router.push('/?view=prompt')
-  }
-
-  const handleBack = () => {
-    setHasStarted(false)
-    // Update URL to remove query parameter
-    router.push('/')
-  }
-
-  if (!hasStarted) {
-    return <WelcomePage onStart={handleStart} />
-  }
+  if (!hasStarted) return <WelcomePage onStart={handleStart} />
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
-      <div className="container mx-auto px-4 py-4 md:py-12 max-w-5xl">
-        {/* Navigation */}
-        <div className="mb-4 flex justify-between items-center">
-          <Button 
-            variant="ghost" 
-            onClick={handleBack}
-            className="flex items-center text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Welcome
-          </Button>
-          
-          <div className="flex items-center gap-2">
-            <Link href="/history">
-              <Button variant="outline" className="flex items-center">
-                History
-              </Button>
-            </Link>
-            <Link href="/marketplace">
-              <Button variant="outline" className="flex items-center">
-                Marketplace
-              </Button>
-            </Link>
-            <Link href="/analytics">
-              <Button variant="outline" className="flex items-center">
-                Analytics
-              </Button>
-            </Link>
-            <Link href="/pricing">
-              <Button variant="outline" className="flex items-center">
-                Pricing
-              </Button>
-            </Link>
-            <Link href="/video-prompt">
-              <Button variant="outline" className="flex items-center">
-                <Film className="mr-2 h-4 w-4" />
-                Switch to Video Prompts
-              </Button>
-            </Link>
+    <main className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950 dark:to-purple-950">
+      {/* Hero */}
+      <motion.section 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="py-12 text-center bg-gradient-to-r from-indigo-600 to-purple-600 text-white"
+      >
+        <h1 className="text-4xl md:text-6xl font-bold mb-4">Text Prompt Generator</h1>
+        <p className="text-xl">Craft perfect AI prompts with our advanced builder</p>
+      </motion.section>
+
+      <div className="w-full p-4 md:p-8">
+        <div className="flex justify-between mb-6">
+          <Button variant="ghost" onClick={handleBack}><ArrowLeft /> Back</Button>
+          <div className="space-x-2">
+            <Link href="/history"><Button>History</Button></Link>
+            <Link href="/marketplace"><Button>Marketplace</Button></Link>
+            <Link href="/analytics"><Button>Analytics</Button></Link>
+            <Link href="/pricing"><Button>Pricing</Button></Link>
+            <Link href="/video-prompt"><Button><Film /> Video</Button></Link>
           </div>
         </div>
-        
-        {/* Reduced top padding for mobile and adjusted spacing */}
-        <header className="mb-6 md:mb-8 text-center space-y-3 pt-4 md:pt-8">
-          <h1 className="text-2xl md:text-4xl font-bold text-slate-800 dark:text-slate-100">
-            PROMPTHERO
-          </h1>
-          <p className="text-sm md:text-lg text-slate-600 dark:text-slate-400 max-w-xl mx-auto leading-relaxed">
-            Transform your messy thoughts into high-quality, ready-to-use AI prompts
-          </p>
-        </header>
 
-        <div className="grid gap-6 md:gap-8 mt-6 md:mt-8">
-          <PromptForm onResults={handleResults} />
-          <div className="min-h-[100px]">
-            {results.length > 0 ? (
-              <Suspense fallback={<div className="h-32 flex items-center justify-center">Loading results...</div>}>
-                <PromptResults results={results} />
-              </Suspense>
-            ) : null}
-          </div>
+        {/* Usage Dashboard */}
+        <Card className="mb-6">
+          <CardContent className="p-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm text-muted-foreground">Daily Usage</p>
+                <Progress value={(usage.daily / 10) * 100} className="mt-2" />
+                <p className="mt-1">{usage.daily}/10</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Total Usage</p>
+                <Progress value={(usage.total / 100) * 100} className="mt-2" />
+                <p className="mt-1">{usage.total}/100</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="grid md:grid-cols-2 gap-4 md:gap-8">
+          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
+            <PromptForm onResults={setResults} />
+          </motion.div>
+          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
+            {results.length > 0 && <PromptResults results={results} />}
+          </motion.div>
         </div>
       </div>
       <Toaster />
     </main>
-  )
-}
-
-// Main page component with Suspense boundary
-export default function Page() {
-  return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-4">Loading...</h1>
-          <div className="w-48 h-1 bg-slate-200 dark:bg-slate-700 rounded-full mx-auto overflow-hidden">
-            <div className="bg-indigo-500 h-full animate-progress"></div>
-          </div>
-        </div>
-      </div>
-    }>
-      <PageContent />
-    </Suspense>
   )
 }
