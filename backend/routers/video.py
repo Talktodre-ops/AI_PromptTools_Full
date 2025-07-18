@@ -1,7 +1,9 @@
-from fastapi import APIRouter, BackgroundTasks
+from fastapi import APIRouter, BackgroundTasks, HTTPException, Depends
 from pydantic import BaseModel
 from services.gemini_service import generate_refined_prompts, build_video_prompt, build_commercial_prompt
-from typing import Optional
+from services.supabase_service import SupabaseService
+from routers.users import get_current_user
+from typing import Optional, Dict, Any
 
 router = APIRouter()
 
@@ -24,8 +26,19 @@ class QuickVideoPromptRequest(BaseModel):
     template_type: str = "cinematic"  # cinematic, commercial, social, documentary, artistic
 
 @router.post("/video")
-async def generate_video_prompt(request: VideoPromptRequest):
+async def generate_video_prompt(
+    request: VideoPromptRequest,
+    background_tasks: BackgroundTasks,
+    current_user: Dict[str, Any] = Depends(get_current_user)
+):
     """Generate enhanced video prompts with tool-specific optimization"""
+    
+    # Check usage quota
+    if current_user["usage_count"] >= current_user["usage_quota"]:
+        raise HTTPException(
+            status_code=403,
+            detail="Daily usage quota exceeded. Please upgrade your subscription."
+        )
     
     try:
         # Check if this is a commercial template request
@@ -57,14 +70,47 @@ async def generate_video_prompt(request: VideoPromptRequest):
             request.return_format
         )
         
+        # Save prompt in the background
+        background_tasks.add_task(
+            save_video_prompt_to_db,
+            current_user["id"],
+            request.raw_input,
+            refined_prompts,
+            "video",
+            request.tone,
+            "",
+            request.return_format,
+            {
+                "tool_type": request.tool_type,
+                "style": request.style,
+                "camera_angle": request.camera_angle,
+                "lighting": request.lighting,
+                "movement": request.movement,
+                "quality": request.quality,
+                "commercial_type": request.commercial_type,
+                "context_details": request.context_details
+            }
+        )
+        
         return {"refined_prompts": refined_prompts}
         
     except Exception as e:
         return {"error": f"Failed to generate video prompt: {str(e)}"}
 
 @router.post("/video/quick")
-async def generate_quick_video_prompt(request: QuickVideoPromptRequest):
+async def generate_quick_video_prompt(
+    request: QuickVideoPromptRequest,
+    background_tasks: BackgroundTasks,
+    current_user: Dict[str, Any] = Depends(get_current_user)
+):
     """Generate quick video prompts with preset templates"""
+    
+    # Check usage quota
+    if current_user["usage_count"] >= current_user["usage_quota"]:
+        raise HTTPException(
+            status_code=403,
+            detail="Daily usage quota exceeded. Please upgrade your subscription."
+        )
     
     try:
         # Quick template mapping
@@ -127,6 +173,26 @@ async def generate_quick_video_prompt(request: QuickVideoPromptRequest):
             "plain"
         )
         
+        # Save prompt in the background
+        background_tasks.add_task(
+            save_video_prompt_to_db,
+            current_user["id"],
+            request.raw_input,
+            refined_prompts,
+            "video",
+            "default",
+            "",
+            "plain",
+            {
+                "template_type": request.template_type,
+                "tool_type": template["tool_type"],
+                "style": template["style"],
+                "lighting": template["lighting"],
+                "movement": template["movement"],
+                "quality": template["quality"]
+            }
+        )
+        
         return {"refined_prompts": refined_prompts}
         
     except Exception as e:
@@ -187,4 +253,41 @@ async def get_video_templates():
             {"value": "documentary", "label": "Documentary", "description": "Authentic storytelling"},
             {"value": "artistic", "label": "Artistic", "description": "Creative and experimental"}
         ]
-    } 
+    }
+
+async def save_video_prompt_to_db(
+    user_id: str,
+    raw_input: str,
+    refined_prompts: list,
+    mode: str,
+    tone: str,
+    persona: str,
+    return_format: str,
+    metadata: dict
+):
+    """Save video prompt to database and update user stats."""
+    # Save the prompt
+    await SupabaseService.save_prompt(
+        user_id, raw_input, refined_prompts, mode, tone, persona, return_format
+    )
+    
+    # Track activity
+    await SupabaseService.track_activity(
+        user_id,
+        "video_prompt_generated",
+        None,
+        {
+            "tone": tone,
+            "prompt_length": len(raw_input),
+            "results_count": len(refined_prompts),
+            "tool_type": metadata.get("tool_type", "runway"),
+            "style": metadata.get("style", "cinematic")
+        }
+    )
+    
+    # Update usage statistics
+    await SupabaseService.update_user_usage(
+        user_id,
+        prompts_generated=1,
+        tokens_used=len(raw_input) // 4  # Rough estimate of tokens
+    ) 

@@ -14,8 +14,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { fetchFromApi, type PromptResponse, type PromptRequest, API_URL } from "@/lib/api"
 import type { Prompt } from "@/types"
 import { useToast } from "@/components/ui/use-toast"
-import { cleanPromptText, UsageTracker, PromptHistory } from "@/lib/utils"
-import { Sparkles, Zap, Wand2, BookOpen, Target, Lightbulb, Crown, AlertTriangle, TrendingUp } from "lucide-react"
+import { UsageTracker, PromptHistory } from "@/lib/utils"
+import { Sparkles, Zap, Wand2, BookOpen, Target, Crown, AlertTriangle } from "lucide-react"
 
 // Enhanced template system
 const PROMPT_TEMPLATES = {

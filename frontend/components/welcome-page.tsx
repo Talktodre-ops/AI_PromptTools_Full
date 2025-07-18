@@ -186,6 +186,26 @@ Use a tone that creates urgency without inducing despair, and include credible d
                   <Star className="mr-2 sm:mr-3 h-5 w-5 sm:h-6 sm:w-6" />
                   See Examples
                 </Button>
+
+                {/* New Auth Buttons */}
+                <Link href="/login">
+                  <Button
+                    variant="secondary"
+                    size="lg"
+                    className="w-full sm:w-auto px-8 sm:px-10 py-4 sm:py-6 text-lg sm:text-xl bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm"
+                  >
+                    Log In
+                  </Button>
+                </Link>
+                <Link href="/register">
+                  <Button
+                    variant="secondary"
+                    size="lg"
+                    className="w-full sm:w-auto px-8 sm:px-10 py-4 sm:py-6 text-lg sm:text-xl bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm"
+                  >
+                    Create Account
+                  </Button>
+                </Link>
               </div>
 
               {/* Stats - Already responsive */}

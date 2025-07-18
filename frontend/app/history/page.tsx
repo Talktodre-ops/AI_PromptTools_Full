@@ -215,7 +215,7 @@ export default function HistoryPage() {
 
   const getUniqueCategories = () => {
     const categories = new Set(history.map(item => item.category).filter(Boolean))
-    return Array.from(categories)
+    return Array.from(categories) as string[]
   }
 
   const getUniqueModes = () => {
