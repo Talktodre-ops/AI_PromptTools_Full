@@ -3,19 +3,19 @@
 import { useState, useEffect, Suspense } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import Link from "next/link"
-import type { Prompt } from "@/types"
 import PromptForm from "@/components/prompt-form"
 import PromptResults from "@/components/prompt-results"
 import WelcomePage from "@/components/welcome-page"
 import { Toaster } from "@/components/ui/toaster"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, Film } from "lucide-react"
+import { ArrowLeft, Film, Image } from "lucide-react"
 import { motion } from "framer-motion"
 import { Card, CardContent } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
+import { usePromptStore } from "@/lib/stores/promptStore"
 
 export default function Page() {
-  const [results, setResults] = useState<Prompt[]>([])
+  const { results, setResults } = usePromptStore()
   const [hasStarted, setHasStarted] = useState(false)
   const [usage, setUsage] = useState({ daily: 0, total: 0 })
   const searchParams = useSearchParams()
@@ -25,8 +25,6 @@ export default function Page() {
     // Load states
     const view = searchParams.get('view')
     setHasStarted(view === 'prompt' || localStorage.getItem('hasStarted') === 'true')
-    const savedResults = localStorage.getItem('promptResults')
-    if (savedResults) setResults(JSON.parse(savedResults))
     // Mock usage
     setUsage({ daily: 3, total: 45 })
   }, [searchParams])
@@ -34,8 +32,7 @@ export default function Page() {
   useEffect(() => {
     if (hasStarted) router.push('/?view=prompt')
     localStorage.setItem('hasStarted', hasStarted.toString())
-    if (results.length) localStorage.setItem('promptResults', JSON.stringify(results))
-  }, [hasStarted, results, router])
+  }, [hasStarted, router])
 
   const handleStart = () => setHasStarted(true)
   const handleBack = () => setHasStarted(false)
@@ -63,6 +60,7 @@ export default function Page() {
             <Link href="/analytics"><Button>Analytics</Button></Link>
             <Link href="/pricing"><Button>Pricing</Button></Link>
             <Link href="/video-prompt"><Button><Film /> Video</Button></Link>
+            <Link href="/video-prompt?tab=image"><Button><Image/> Image</Button></Link>
           </div>
         </div>
 

@@ -160,11 +160,18 @@ const FORMATS = [
 	{ value: "json", label: "JSON", description: "Structured data format" },
 ]
 
-interface Props {
-  onResults: (results: Prompt[]) => void
-}
+import { usePromptStore } from "@/lib/stores/promptStore";
 
-export default function PromptForm({ onResults }: Props) {
+// ... (rest of the imports)
+
+// Remove the Props interface
+// interface Props {
+//   onResults: (results: Prompt[]) => void;
+// }
+
+export default function PromptForm(/*{ onResults }: Props*/) {
+  const setResults = usePromptStore((state) => state.setResults);
+  // ... (rest of the component)
 	const [isLoading, setIsLoading] = useState(false)
 	const [activeTab, setActiveTab] = useState("builder")
 	const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null)
@@ -277,7 +284,7 @@ export default function PromptForm({ onResults }: Props) {
 				}))
 				
 				console.log('Transformed Prompts:', prompts)
-				onResults(prompts)
+				setResults(prompts)
 
 				// Save to history
 				const enhancedPrompt = prompts.map(p => p.prompt).join('\n\n')
@@ -400,7 +407,7 @@ export default function PromptForm({ onResults }: Props) {
 					prompt: promptText
 				}))
 				
-				onResults(prompts)
+				setResults(prompts)
 
 				// Save to history
 				const enhancedPrompt = prompts.map(p => p.prompt).join('\n\n')

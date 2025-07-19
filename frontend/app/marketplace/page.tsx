@@ -114,7 +114,7 @@ export default function MarketplacePage() {
         setTemplates(prev => [...prev, ...newTemplates])
         if (page >= 5) setHasMore(false) // Simulate end of data
       }, 1000)
-    }
+      }
   }, [page])
 
   const handleLike = (templateId: string) => {
@@ -208,16 +208,16 @@ export default function MarketplacePage() {
   }
 
   const renderStars = (rating: number) => (
-    <div className="flex items-center gap-1">
-      {[1, 2, 3, 4, 5].map((star) => (
-        <Star
-          key={star}
-          className={`w-4 h-4 ${star <= rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
-        />
-      ))}
-      <span className="text-sm text-gray-600 ml-1">{rating.toFixed(1)}</span>
-    </div>
-  )
+      <div className="flex items-center gap-1">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <Star
+            key={star}
+            className={`w-4 h-4 ${star <= rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+          />
+        ))}
+        <span className="text-sm text-gray-600 ml-1">{rating.toFixed(1)}</span>
+      </div>
+    )
 
   const featuredTemplates = templates.slice(0, 5)
 
@@ -273,7 +273,7 @@ export default function MarketplacePage() {
               <stat.icon className="h-8 w-8 mx-auto mb-2 text-indigo-600" />
               <h3 className="text-3xl font-bold mb-1">{stat.value}</h3>
               <p className="text-sm text-gray-600">{stat.label}</p>
-            </Card>
+          </Card>
           ))}
         </motion.div>
 
@@ -297,8 +297,8 @@ export default function MarketplacePage() {
                     <CardContent>
                       {renderStars(template.rating)}
                       <Button className="mt-4 w-full" onClick={() => handleViewTemplate(template)}>View</Button>
-                    </CardContent>
-                  </Card>
+            </CardContent>
+          </Card>
                 </CarouselItem>
               ))}
             </CarouselContent>
@@ -309,12 +309,12 @@ export default function MarketplacePage() {
 
         {/* Filters */}
         <div className="flex flex-col md:flex-row gap-4 mb-8">
-          <Input
+            <Input
             placeholder="Search templates..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             className="flex-1"
-          />
+            />
           <Select value={selectedCategory} onValueChange={setSelectedCategory}>
             <SelectTrigger className="w-[180px]">
               <SelectValue />
@@ -357,21 +357,21 @@ export default function MarketplacePage() {
                     <div className="flex justify-between">
                       <CardTitle>{template.title}</CardTitle>
                       {template.isPremium && <Badge>Premium</Badge>}
-                    </div>
+                  </div>
                     <CardDescription>{template.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    {renderStars(template.rating)}
+              </CardHeader>
+              <CardContent>
+                  {renderStars(template.rating)}
                     <div className="flex gap-2 mt-4">
                       <Button onClick={() => handleViewTemplate(template)}>View</Button>
                       <Button variant="outline" onClick={() => handleLike(template.id)}>
                         <Heart className={template.isLiked ? 'fill-red-500' : ''} />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
+                    </Button>
+                </div>
+              </CardContent>
+            </Card>
               </motion.div>
-            ))}
+          ))}
           </AnimatePresence>
         </div>
         {hasMore && (

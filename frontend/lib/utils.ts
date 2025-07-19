@@ -6,22 +6,29 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function cleanPromptText(text: string): string {
-  // Remove asterisk bullet points and replace with dashes
-  text = text.replace(/^\s*\*\s+/gm, '- ')
+  // First, remove any markdown-style formatting like bold/italics
+  let cleaned = text.replace(/\*\*(.*?)\*\*/g, '$1').replace(/\*(.*?)\*/g, '$1');
   
-  // Clean up variant headers (remove asterisks from variant labels)
-  text = text.replace(/\*\*Variant (\d+):\*\*/g, 'Variant $1:')
+  // Then, remove backticks and the word "prompt"
+  cleaned = cleaned.replace(/`/g, "").replace(/markdown/gi, "").replace(/prompt:/gi, "");
   
-  // Ensure consistent spacing after variant label
-  text = text.replace(/(Variant \d+:)(\S)/g, '$1 $2')
+  if (cleaned.toLowerCase().includes("/imagine")) {
+      const imagineIndex = cleaned.toLowerCase().indexOf("/imagine");
+      cleaned = cleaned.substring(imagineIndex);
+  } else {
+      const commonGreetings = ["here's a prompt", "here is a prompt", "here's your prompt", "here is your prompt"];
+      for (const greeting of commonGreetings) {
+          if (cleaned.toLowerCase().startsWith(greeting)) {
+              cleaned = cleaned.substring(greeting.length).trim();
+              break;
+          }
+      }
+  }
   
-  // Remove any remaining standalone asterisks
-  text = text.replace(/(?<!\*)\*(?!\*)/g, '')
+  // Finally, remove any remaining standalone asterisks
+  cleaned = cleaned.replace(/\*/g, '');
   
-  // Remove double asterisks (bold markdown)
-  text = text.replace(/\*\*(.*?)\*\*/g, '$1')
-  
-  return text
+  return cleaned.trim();
 }
 
 // Development flag - set to true during development to unlock all features

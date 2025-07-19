@@ -51,9 +51,6 @@ export interface MarketplaceTemplate {
 export interface MarketplaceStats {
   totalTemplates: number
   totalDownloads: number
-  totalLikes: number
-  totalViews: number
-  averageRating: number
   activeContributors: number
-  categoryCounts: Record<string, number>
+  averageRating: number
 }

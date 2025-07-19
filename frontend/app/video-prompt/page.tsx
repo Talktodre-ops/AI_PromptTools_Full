@@ -1,87 +1,91 @@
 "use client"
 
 import { useState, useEffect, Suspense } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import type { Prompt } from "@/types"
 import VideoPromptForm from "@/components/video-prompt-form"
+import ImagePromptForm from "@/components/image-prompt-form"
 import PromptResults from "@/components/prompt-results"
 import { Toaster } from "@/components/ui/toaster"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, Film } from "lucide-react"
+import { ArrowLeft, Film, Image as ImageIcon } from "lucide-react"
 import { motion } from "framer-motion"
 import { Card, CardContent } from "@/components/ui/card"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Progress } from "@/components/ui/progress"
+import { cleanPromptText } from "@/lib/utils" // Import the utility
 
-export default function VideoPromptPage() {
+export default function MediaPromptPage() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  
+  const [activeTab, setActiveTab] = useState(searchParams.get("tab") || "video")
   const [results, setResults] = useState<Prompt[]>([])
   const [usage, setUsage] = useState({ daily: 0, total: 0 })
-  const router = useRouter()
 
   useEffect(() => {
-    const savedResults = localStorage.getItem('videoPromptResults')
+    const savedResults = localStorage.getItem(`${activeTab}PromptResults`)
     if (savedResults) setResults(JSON.parse(savedResults))
-    // Mock usage
-    setUsage({ daily: 3, total: 45 })
-  }, [])
+    setUsage({ daily: activeTab === 'video' ? 3 : 1, total: activeTab === 'video' ? 45 : 15 })
+  }, [activeTab])
 
   useEffect(() => {
-    if (results.length) localStorage.setItem('videoPromptResults', JSON.stringify(results))
-  }, [results])
+    if (results.length) localStorage.setItem(`${activeTab}PromptResults`, JSON.stringify(results))
+  }, [results, activeTab])
 
-  const handleResults = (newResults: Prompt[]) => setResults(newResults)
+  const handleResults = (newResults: Prompt[]) => {
+    const cleanedResults = newResults.map(result => ({
+      ...result,
+      prompt: cleanPromptText(result.prompt)
+    }));
+    setResults(cleanedResults);
+  }
   const handleBack = () => router.push('/')
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950 dark:to-purple-950">
-      {/* Hero */}
       <motion.section 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="py-12 text-center bg-gradient-to-r from-rose-600 to-pink-600 text-white"
+        className={`py-12 text-center text-white transition-colors duration-500 ${activeTab === 'video' ? 'bg-gradient-to-r from-rose-600 to-pink-600' : 'bg-gradient-to-r from-teal-600 to-cyan-600'}`}
       >
-        <h1 className="text-4xl md:text-6xl font-bold mb-4">Video Prompt Generator</h1>
-        <p className="text-xl">Create cinematic AI video prompts</p>
+        <h1 className="text-4xl md:text-6xl font-bold mb-4">
+          {activeTab === 'video' ? 'Video Prompt Generator' : 'Image Prompt Generator'}
+        </h1>
+        <p className="text-xl">
+          {activeTab === 'video' ? 'Create cinematic AI video prompts' : 'Generate precise prompts from vague ideas or existing images'}
+        </p>
       </motion.section>
 
       <div className="w-full p-4 md:p-8">
         <div className="flex justify-between mb-6">
           <Button variant="ghost" onClick={handleBack}><ArrowLeft /> Back</Button>
           <div className="space-x-2">
-            <Link href="/history"><Button>History</Button></Link>
-            <Link href="/marketplace"><Button>Marketplace</Button></Link>
-            <Link href="/analytics"><Button>Analytics</Button></Link>
-            <Link href="/pricing"><Button>Pricing</Button></Link>
-            <Link href="/prompt"><Button>Text Prompts</Button></Link>
+            <Link href="/prompt"><Button>Text</Button></Link>
           </div>
         </div>
 
-        {/* Usage Dashboard */}
-        <Card className="mb-6">
-          <CardContent className="p-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-sm text-muted-foreground">Daily Usage</p>
-                <Progress value={(usage.daily / 10) * 100} className="mt-2" />
-                <p className="mt-1">{usage.daily}/10</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Total Usage</p>
-                <Progress value={(usage.total / 100) * 100} className="mt-2" />
-                <p className="mt-1">{usage.total}/100</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <div className="grid md:grid-cols-2 gap-4 md:gap-8">
-          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-            <VideoPromptForm onResults={handleResults} />
-          </motion.div>
-          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
-            {results.length > 0 && <PromptResults results={results} />}
-          </motion.div>
-        </div>
+        <Tabs value={activeTab} onValueChange={(value) => { setActiveTab(value); setResults([]) }} className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="video"><Film className="mr-2"/>Video</TabsTrigger>
+            <TabsTrigger value="image"><ImageIcon className="mr-2"/>Image</TabsTrigger>
+          </TabsList>
+          
+          <div className="grid md:grid-cols-2 gap-4 md:gap-8 mt-6">
+            <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
+              <TabsContent value="video">
+                <VideoPromptForm onResults={handleResults} />
+              </TabsContent>
+              <TabsContent value="image">
+                <ImagePromptForm onResults={handleResults} />
+              </TabsContent>
+            </motion.div>
+            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
+              {results.length > 0 && <PromptResults results={results} />}
+            </motion.div>
+          </div>
+        </Tabs>
       </div>
       <Toaster />
     </main>
