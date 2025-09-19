@@ -20,7 +20,7 @@ async def setup_database():
     try:
         # Read the schema file
         script_dir = os.path.dirname(os.path.abspath(__file__))
-        schema_path = os.path.join(script_dir, 'schema.sql')
+        schema_path = os.path.join(script_dir, 'schema_new.sql')
         
         with open(schema_path, 'r') as f:
             schema_sql = f.read()
@@ -34,10 +34,10 @@ async def setup_database():
         await conn.execute(schema_sql)
         print(f"✅ Database schema created successfully!")
         
-        # Create initial subscription plans
-        print(f"🔄 Creating initial subscription plans...")
-        await create_subscription_plans(conn)
-        print(f"✅ Initial subscription plans created!")
+        # Create initial data
+        print(f"🔄 Creating initial data...")
+        await create_initial_data(conn)
+        print(f"✅ Initial data created!")
         
         await conn.close()
         return True
@@ -46,79 +46,51 @@ async def setup_database():
         print(f"❌ Error setting up database: {e}")
         return False
 
-async def create_subscription_plans(conn):
-    """Create initial subscription plans."""
-    # Check if plans already exist
-    plans_exist = await conn.fetchval("SELECT EXISTS(SELECT 1 FROM subscription_plans)")
-    
-    if plans_exist:
-        print("✅ Subscription plans already exist, skipping creation")
+async def create_initial_data(conn):
+    """Create initial data like prompt templates."""
+    # Check if templates already exist
+    templates_exist = await conn.fetchval("SELECT EXISTS(SELECT 1 FROM prompt_templates)")
+
+    if templates_exist:
+        print("✅ Initial templates already exist, skipping creation")
         return
-    
-    # Define subscription plans
-    plans = [
+
+    # Define initial prompt templates
+    templates = [
         {
-            'name': 'Free',
-            'price': 0.00,
-            'billing_cycle': 'monthly',
-            'features': {
-                'daily_prompts': 5,
-                'can_save': True,
-                'templates': 'basic',
-                'support': 'community'
-            },
-            'prompt_limit': 5
+            'name': 'Basic Writing Assistant',
+            'category': 'writing',
+            'description': 'General purpose writing improvement',
+            'template_content': 'Please improve the following text for clarity and engagement: {input_text}',
+            'variables': ['input_text'],
+            'example_output': 'Enhanced version with better flow and clarity'
         },
         {
-            'name': 'Pro',
-            'price': 9.99,
-            'billing_cycle': 'monthly',
-            'features': {
-                'daily_prompts': 50,
-                'can_save': True,
-                'templates': 'all',
-                'support': 'email',
-                'priority_processing': True
-            },
-            'prompt_limit': 50
+            'name': 'Video Prompt - Cinematic',
+            'category': 'video',
+            'description': 'Create cinematic video prompts',
+            'template_content': 'Create a cinematic video of: {scene_description}. Style: {visual_style}. Camera: {camera_movement}',
+            'variables': ['scene_description', 'visual_style', 'camera_movement'],
+            'example_output': 'Professional video generation prompt'
         },
         {
-            'name': 'Pro Annual',
-            'price': 99.99,
-            'billing_cycle': 'yearly',
-            'features': {
-                'daily_prompts': 50,
-                'can_save': True,
-                'templates': 'all',
-                'support': 'email',
-                'priority_processing': True
-            },
-            'prompt_limit': 50
-        },
-        {
-            'name': 'Enterprise',
-            'price': 49.99,
-            'billing_cycle': 'monthly',
-            'features': {
-                'daily_prompts': 200,
-                'can_save': True,
-                'templates': 'all',
-                'support': 'dedicated',
-                'priority_processing': True,
-                'api_access': True,
-                'team_management': True
-            },
-            'prompt_limit': 200
+            'name': 'Code Explanation',
+            'category': 'code',
+            'description': 'Explain code functionality',
+            'template_content': 'Explain this code in simple terms: {code_snippet}. Focus on what it does and how it works.',
+            'variables': ['code_snippet'],
+            'example_output': 'Clear explanation of code functionality'
         }
     ]
-    
-    # Insert plans into database
-    for plan in plans:
+
+    # Insert templates into database
+    for template in templates:
         await conn.execute("""
-            INSERT INTO subscription_plans 
-            (name, price, billing_cycle, features, prompt_limit, is_active)
-            VALUES ($1, $2, $3, $4, $5, true)
-        """, plan['name'], plan['price'], plan['billing_cycle'], plan['features'], plan['prompt_limit'])
+            INSERT INTO prompt_templates
+            (name, category, description, template_content, variables, example_output, is_active, usage_count)
+            VALUES ($1, $2, $3, $4, $5, $6, true, 0)
+        """, template['name'], template['category'], template['description'],
+             template['template_content'], template['variables'], template['example_output'])
 
 # Run the setup function
 if __name__ == "__main__":

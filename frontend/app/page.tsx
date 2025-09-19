@@ -5,19 +5,16 @@ import { useSearchParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import PromptForm from "@/components/prompt-form"
 import PromptResults from "@/components/prompt-results"
-import WelcomePage from "@/components/welcome-page"
+import WelcomePage from "@/components/welcome-page-premium"
+import UnifiedPromptInterface from "@/components/unified-prompt-interface"
 import { Toaster } from "@/components/ui/toaster"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, Film, Image } from "lucide-react"
+import { ArrowLeft, Film, Image, Github, Sparkles } from "lucide-react"
 import { motion } from "framer-motion"
-import { Card, CardContent } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
-import { usePromptStore } from "@/lib/stores/promptStore"
 
 export default function Page() {
-  const { results, setResults } = usePromptStore()
+  const [results, setResults] = useState<any[]>([])
   const [hasStarted, setHasStarted] = useState(false)
-  const [usage, setUsage] = useState({ daily: 0, total: 0 })
   const searchParams = useSearchParams()
   const router = useRouter()
 
@@ -25,8 +22,6 @@ export default function Page() {
     // Load states
     const view = searchParams.get('view')
     setHasStarted(view === 'prompt' || localStorage.getItem('hasStarted') === 'true')
-    // Mock usage
-    setUsage({ daily: 3, total: 45 })
   }, [searchParams])
 
   useEffect(() => {
@@ -40,56 +35,94 @@ export default function Page() {
   if (!hasStarted) return <WelcomePage onStart={handleStart} />
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950 dark:to-purple-950">
-      {/* Hero */}
-      <motion.section 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="py-12 text-center bg-gradient-to-r from-indigo-600 to-purple-600 text-white"
+    <main className="min-h-screen bg-black">
+      {/* Premium Hero with glassmorphism */}
+      <motion.section
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="relative py-16 overflow-hidden"
       >
-        <h1 className="text-4xl md:text-6xl font-bold mb-4">Text Prompt Generator</h1>
-        <p className="text-xl">Craft perfect AI prompts with our advanced builder</p>
-      </motion.section>
+        {/* Animated gradient background */}
+        <div className="absolute inset-0 animated-gradient opacity-30" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/50 to-black" />
 
-      <div className="w-full p-4 md:p-8">
-        <div className="flex justify-between mb-6">
-          <Button variant="ghost" onClick={handleBack}><ArrowLeft /> Back</Button>
-          <div className="space-x-2">
-            <Link href="/history"><Button>History</Button></Link>
-            <Link href="/marketplace"><Button>Marketplace</Button></Link>
-            <Link href="/analytics"><Button>Analytics</Button></Link>
-            <Link href="/pricing"><Button>Pricing</Button></Link>
-            <Link href="/video-prompt"><Button><Film /> Video</Button></Link>
-            <Link href="/video-prompt?tab=image"><Button><Image/> Image</Button></Link>
+        {/* Glass card effect */}
+        <div className="relative z-10 max-w-4xl mx-auto text-center px-4">
+          <div className="glass rounded-2xl p-8 backdrop-blur-2xl border border-white/10">
+            <h1 className="text-5xl md:text-7xl font-black mb-4 bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 bg-clip-text text-transparent animate-gradient-x">
+              Text Prompt Generator
+            </h1>
+            <p className="text-xl text-gray-300">Craft perfect AI prompts with our advanced builder</p>
           </div>
         </div>
+      </motion.section>
 
-        {/* Usage Dashboard */}
-        <Card className="mb-6">
-          <CardContent className="p-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-sm text-muted-foreground">Daily Usage</p>
-                <Progress value={(usage.daily / 10) * 100} className="mt-2" />
-                <p className="mt-1">{usage.daily}/10</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Total Usage</p>
-                <Progress value={(usage.total / 100) * 100} className="mt-2" />
-                <p className="mt-1">{usage.total}/100</p>
-              </div>
+      {/* Full width container with minimal padding */}
+      <div className="w-full px-2 md:px-4">
+        {/* Floating navigation */}
+        <motion.div
+          className="flex justify-between mb-6"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+        >
+          <Button
+            variant="ghost"
+            onClick={handleBack}
+            className="glass backdrop-blur-md border border-white/10 text-white hover:bg-white/10"
+          >
+            <ArrowLeft className="mr-2" /> Back
+          </Button>
+          <div className="flex gap-3">
+            <Link href="/gallery">
+              <Button className="glass backdrop-blur-md border border-white/10 bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-white hover:from-purple-500/30 hover:to-pink-500/30">
+                <Sparkles className="mr-2 h-4 w-4" /> Gallery
+              </Button>
+            </Link>
+            <Button
+              onClick={() => window.open('https://github.com/yourusername/AI_PromptTools_Full', '_blank')}
+              className="glass backdrop-blur-md border border-white/10 text-white hover:bg-white/10"
+            >
+              <Github className="mr-2 h-4 w-4" /> GitHub
+            </Button>
+          </div>
+        </motion.div>
+
+        {/* Full width unified prompt interface */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="w-full"
+        >
+          <UnifiedPromptInterface onResults={setResults} results={results} />
+        </motion.div>
+
+        {/* Premium Attribution Footer */}
+        <motion.footer
+          className="mt-20 pt-8 border-t border-white/10 text-center"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.6 }}
+        >
+          <div className="glass-dark rounded-2xl p-8 backdrop-blur-2xl border border-white/10 max-w-4xl mx-auto">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-6">
+              <p className="text-gray-300 text-lg">
+                ✨ Built with <span className="text-red-500">❤️</span> and <span className="text-purple-400">AI Magic</span>
+              </p>
+              <Button
+                onClick={() => window.open('https://github.com/yourusername/AI_PromptTools_Full', '_blank')}
+                className="glass backdrop-blur-md border border-white/10 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 text-white hover:from-yellow-500/30 hover:to-orange-500/30"
+                size="sm"
+              >
+                <Github className="mr-2 h-4 w-4" /> Star this project ⭐
+              </Button>
             </div>
-          </CardContent>
-        </Card>
-
-        <div className="grid md:grid-cols-2 gap-4 md:gap-8">
-          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-            <PromptForm onResults={setResults} />
-          </motion.div>
-          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
-            {results.length > 0 && <PromptResults results={results} />}
-          </motion.div>
-        </div>
+            <p className="text-sm text-gray-400 leading-relaxed">
+              This tool is 100% free and open source. Join our community of AI prompt engineers and help us build the future! 🚀
+            </p>
+          </div>
+        </motion.footer>
       </div>
       <Toaster />
     </main>

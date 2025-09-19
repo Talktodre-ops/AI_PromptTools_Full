@@ -44,16 +44,16 @@ if API_KEY:
         GEMINI_MODEL = genai.GenerativeModel(  # type: ignore
             "models/gemini-2.0-flash"
         )
-        print(f"✅ Successfully created main Gemini model: {GEMINI_MODEL}")
+        print(f"OK Successfully created main Gemini model: {GEMINI_MODEL}")
         
         # Create specialized video model (gemini-1.5-flash for better creative video understanding)
         try:
             GEMINI_VIDEO_MODEL = genai.GenerativeModel(  # type: ignore
                 "models/gemini-1.5-flash"  # Better for creative/visual tasks and free tier
             )
-            print(f"✅ Successfully created video Gemini model: {GEMINI_VIDEO_MODEL}")
+            print(f"OK Successfully created video Gemini model: {GEMINI_VIDEO_MODEL}")
         except Exception as video_error:
-            print(f"⚠️ Failed to create video model, falling back to main model: {video_error}")
+            print(f"WARNING Failed to create video model, falling back to main model: {video_error}")
             GEMINI_VIDEO_MODEL = GEMINI_MODEL
         
         # Set generation config separately if needed
@@ -63,7 +63,7 @@ if API_KEY:
             GEMINI_VIDEO_MODEL._generation_config = video_generation_config  # type: ignore
             
     except Exception as e:
-        print(f"❌ Error creating Gemini models: {e}")
+        print(f"ERROR Error creating Gemini models: {e}")
         print(f"Exception type: {type(e)}")
         traceback.print_exc()
         GEMINI_MODEL = None

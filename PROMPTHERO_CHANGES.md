@@ -1,3 +1,111 @@
+
+
+Proposed Architecture
+
+  ┌─────────────────────────────────────────────────────────┐
+  │                    CloudFlare/CDN                        │
+  └─────────────────────────────────────────────────────────┘
+                                │
+  ┌─────────────────────────────────────────────────────────┐
+  │                  Next.js Frontend                        │
+  │  - Static Generation for landing pages                   │
+  │  - Server Components for auth pages                      │
+  │  - Client Components for interactive prompt editor       │
+  └─────────────────────────────────────────────────────────┘
+                                │
+  ┌─────────────────────────────────────────────────────────┐
+  │                   API Gateway Layer                      │
+  │  - Rate limiting per user (not IP)                       │
+  │  - Request validation                                    │
+  │  - API versioning (/v1, /v2)                            │
+  └─────────────────────────────────────────────────────────┘
+                                │
+          ┌─────────────────────┴─────────────────────┐
+          │                                           │
+  ┌───────▼──────────┐                   ┌───────────▼──────────┐
+  │  FastAPI Write   │                   │   FastAPI Read       │
+  │  - Create/Update │                   │   - Cached queries   │
+  │  - Delete ops    │                   │   - Analytics        │
+  └──────────────────┘                   └──────────────────────┘
+          │                                           │
+          │         ┌─────────────────────┐         │
+          └────────►│    Redis Cache       │◄────────┘
+                    │  - Session store     │
+                    │  - Prompt cache      │
+                    │  - Rate limit data   │
+                    └─────────────────────┘
+                              │
+                    ┌─────────▼─────────┐
+                    │    Job Queue       │
+                    │  - Async AI calls  │
+                    │  - Batch process   │
+                    └───────────────────┘
+                              │
+          ┌───────────────────┴───────────────────┐
+          │                                       │
+  ┌───────▼──────────┐               ┌───────────▼──────────┐
+  │   Supabase DB    │               │   AI Services        │
+  │  - PostgreSQL    │               │  - Gemini API        │
+  │  - Vector search │               │  - Image processing  │
+  └──────────────────┘               └──────────────────────┘
+
+  Key Improvements
+
+  1. Caching Strategy
+    - Redis for session management (faster than DB)
+    - Cache frequently used templates
+    - Cache recent prompts for quick access
+  2. Async Processing
+    - Queue long-running AI operations
+    - Return job ID immediately
+    - Poll or websocket for results
+  3. Database Optimization
+    - Read replicas for analytics queries
+    - Connection pooling
+    - Prepared statements for common queries
+  4. API Design
+    - RESTful + GraphQL for complex queries
+    - Versioned endpoints
+    - Pagination for list endpoints
+  5. Security Enhancements
+    - Rate limiting by user, not IP
+    - Input sanitization middleware
+    - API key management for power users
+  6. Monitoring
+    - Structured logging (JSON)
+    - Metrics collection (Prometheus format)
+    - Error tracking (Sentry integration)
+
+  Would you like me to proceed with creating the database setup script with these tables? Please provide the
+  Supabase credentials when ready.
+
+
+
+
+
+
+
+
+
+
+
+
+☐ Fix or remove scroll animation on landing page
+  ☐ Remove pricing section and enhance Get Started button
+  ☐ Add developer attribution on landing and other pages
+  ☐ Fix Try Free Demo button to go to prompt generation
+  ☐ Add VEO3 to video prompt generator
+
+
+
+
+
+
+
+
+
+
+
 # PROMPTHERO Implementation Changes
 
 This document summarizes the changes made to rebrand the application to PROMPTHERO and implement the new video prompt generation feature.

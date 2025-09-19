@@ -12,7 +12,7 @@ from collections import defaultdict
 
 # Add the parent directory to sys.path to allow imports from sibling directories
 sys.path.append(str(Path(__file__).parent.parent))
-from routers import refine, explain, video, users, analytics, image
+from routers import refine, explain, video, users, analytics, image, gallery
 from services.supabase_service import SupabaseService
 
 app = FastAPI(
@@ -117,6 +117,7 @@ app.include_router(video.router)
 app.include_router(users.router)
 app.include_router(analytics.router)
 app.include_router(image.router, tags=["image"])
+app.include_router(gallery.router, tags=["gallery"])
 
 # Add a root endpoint for API health check
 @app.get("/")
@@ -148,14 +149,14 @@ async def startup_event():
             missing_vars.append(var)
     
     if missing_vars:
-        print("❌ WARNING: Missing environment variables:", ", ".join(missing_vars))
+        print("WARNING: Missing environment variables:", ", ".join(missing_vars))
     
     # Check Supabase connection
     supabase_client = SupabaseService.get_client()
     if not supabase_client:
-        print("❌ WARNING: Supabase connection not established")
+        print("WARNING: Supabase connection not established")
     else:
-        print("✅ Connected to Supabase successfully")
+        print("OK Connected to Supabase successfully")
 
 # Shutdown event
 @app.on_event("shutdown")

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends, status
+from fastapi import APIRouter, HTTPException, Depends, status, Header
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel, EmailStr
 from typing import Optional, Dict, Any
@@ -100,6 +100,16 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> Dict[str, Any
         )
     
     return user
+
+async def get_optional_user(authorization: Optional[str] = Header(None)) -> Optional[Dict[str, Any]]:
+    """Get current user if token is provided, otherwise return None."""
+    if not authorization:
+        return None
+
+    try:
+        return await get_current_user(authorization)
+    except HTTPException:
+        return None
 
 # Endpoints
 @router.post("/register", response_model=UserResponse)
