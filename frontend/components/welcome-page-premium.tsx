@@ -54,13 +54,7 @@ export default function WelcomePremium({ onStart }: WelcomePageProps) {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
   const [currentFeature, setCurrentFeature] = useState(0)
   const [isClient, setIsClient] = useState(false)
-  const { scrollY } = useScroll()
   const heroRef = useRef<HTMLDivElement>(null)
-
-  const parallaxY1 = useTransform(scrollY, [0, 500], [0, 150])
-  const parallaxY2 = useTransform(scrollY, [0, 500], [0, -150])
-  const opacity = useTransform(scrollY, [0, 300], [1, 0])
-  const scale = useTransform(scrollY, [0, 300], [1, 0.8])
 
   useEffect(() => {
     setIsVisible(true)
@@ -165,7 +159,6 @@ export default function WelcomePremium({ onStart }: WelcomePageProps) {
       <motion.section
         ref={heroRef}
         className="relative min-h-screen flex items-center justify-center overflow-hidden"
-        style={{ opacity, scale }}
       >
         {/* Dynamic gradient background */}
         <div className="absolute inset-0">
@@ -206,33 +199,9 @@ export default function WelcomePremium({ onStart }: WelcomePageProps) {
           </div>
         )}
 
-        {/* 3D floating elements */}
-        <motion.div
-          className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full filter blur-3xl opacity-30"
-          style={{ y: parallaxY1 }}
-          animate={{
-            x: [0, 50, 0],
-            y: [0, -30, 0],
-          }}
-          transition={{
-            duration: 20,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        />
-        <motion.div
-          className="absolute bottom-20 right-10 w-96 h-96 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full filter blur-3xl opacity-30"
-          style={{ y: parallaxY2 }}
-          animate={{
-            x: [0, -50, 0],
-            y: [0, 30, 0],
-          }}
-          transition={{
-            duration: 25,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        />
+        {/* Simplified floating elements */}
+        <div className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full filter blur-3xl opacity-20" />
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full filter blur-3xl opacity-20" />
 
         {/* Main content */}
         <div className="relative z-10 text-center px-4 max-w-7xl mx-auto">
@@ -319,42 +288,35 @@ export default function WelcomePremium({ onStart }: WelcomePageProps) {
             >
               <Button
                 size="lg"
-                className="group relative px-8 py-6 text-lg font-bold bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 transition-all duration-300 overflow-hidden"
+                className="group relative px-12 py-8 text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 transition-all duration-300 overflow-hidden shadow-2xl shadow-purple-500/25 hover:shadow-purple-500/40"
                 onClick={onStart}
               >
                 <span className="relative z-10 flex items-center">
-                  Start Creating
-                  <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                  🚀 Get Started For Free
+                  <ArrowRight className="ml-3 h-6 w-6 group-hover:translate-x-1 transition-transform" />
                 </span>
-                <motion.div
-                  className="absolute inset-0 bg-gradient-to-r from-purple-400 to-pink-400"
-                  initial={{ x: "-100%" }}
-                  whileHover={{ x: 0 }}
-                  transition={{ duration: 0.3 }}
-                />
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-400 to-pink-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               </Button>
 
-              <Link href="/video-prompt">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="px-8 py-6 text-lg font-bold border-2 border-white/30 bg-white/5 backdrop-blur-md hover:bg-white/10 hover:border-white/50 transition-all"
-                >
-                  <Video className="mr-2 h-5 w-5" />
-                  Video Prompts
-                </Button>
-              </Link>
+              <Button
+                size="lg"
+                variant="outline"
+                onClick={() => window.location.href = '/video-prompt'}
+                className="px-8 py-6 text-lg font-bold border-2 border-white/30 bg-white/5 backdrop-blur-md hover:bg-white/10 hover:border-white/50 transition-all"
+              >
+                <Video className="mr-2 h-5 w-5" />
+                Video Prompts
+              </Button>
 
-              <Link href="/gallery">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="px-8 py-6 text-lg font-bold border-2 border-white/30 bg-white/5 backdrop-blur-md hover:bg-white/10 hover:border-white/50 transition-all"
-                >
-                  <Palette className="mr-2 h-5 w-5" />
-                  Browse Gallery
-                </Button>
-              </Link>
+              <Button
+                size="lg"
+                variant="outline"
+                onClick={() => window.location.href = '/gallery'}
+                className="px-8 py-6 text-lg font-bold border-2 border-white/30 bg-white/5 backdrop-blur-md hover:bg-white/10 hover:border-white/50 transition-all"
+              >
+                <Palette className="mr-2 h-5 w-5" />
+                Browse Gallery
+              </Button>
             </motion.div>
 
             {/* Live stats */}
@@ -423,19 +385,19 @@ export default function WelcomePremium({ onStart }: WelcomePageProps) {
                 whileHover={{ y: -5 }}
                 className="group"
               >
-                <Card className="h-full bg-gradient-to-br from-gray-900/50 to-gray-800/50 border-gray-700/50 backdrop-blur-xl hover:border-gray-600/50 transition-all duration-300">
+                <Card className="h-full bg-gradient-to-br from-gray-900/80 to-black/60 border-white/20 backdrop-blur-xl hover:border-white/40 hover:bg-gradient-to-br hover:from-gray-800/80 hover:to-gray-900/80 transition-all duration-300 shadow-lg hover:shadow-xl">
                   <CardHeader>
                     <div className={cn(
-                      "w-14 h-14 rounded-xl bg-gradient-to-r flex items-center justify-center mb-4",
+                      "w-14 h-14 rounded-xl bg-gradient-to-r flex items-center justify-center mb-4 shadow-lg",
                       "group-hover:scale-110 transition-transform duration-300",
                       feature.gradient
                     )}>
                       {feature.icon}
                     </div>
-                    <CardTitle className="text-xl text-white">{feature.title}</CardTitle>
+                    <CardTitle className="text-xl text-white font-bold">{feature.title}</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-gray-400">{feature.description}</p>
+                    <p className="text-gray-200 leading-relaxed">{feature.description}</p>
                   </CardContent>
                 </Card>
               </motion.div>
@@ -506,9 +468,12 @@ Style: Engaging storytelling with data-backed insights`}
               </div>
 
               <div className="mt-6 flex justify-center">
-                <Button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
+                <Button
+                  className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                  onClick={onStart}
+                >
                   <Play className="mr-2 h-4 w-4" />
-                  Try Live Demo
+                  Try Free Demo
                 </Button>
               </div>
             </Card>
@@ -543,21 +508,21 @@ Style: Engaging storytelling with data-backed insights`}
                 transition={{ delay: i * 0.1 }}
                 whileHover={{ y: -5 }}
               >
-                <Card className="h-full bg-gradient-to-br from-gray-900/50 to-gray-800/50 border-gray-700/50 backdrop-blur-xl">
+                <Card className="h-full bg-gradient-to-br from-gray-900/80 to-black/60 border-white/20 backdrop-blur-xl hover:border-white/40 hover:bg-gradient-to-br hover:from-gray-800/80 hover:to-gray-900/80 transition-all duration-300 shadow-lg hover:shadow-xl">
                   <CardContent className="p-6">
                     <div className="flex items-center gap-1 mb-4">
                       {[...Array(testimonial.rating)].map((_, i) => (
-                        <Star key={i} className="h-4 w-4 fill-yellow-500 text-yellow-500" />
+                        <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400 drop-shadow-sm" />
                       ))}
                     </div>
-                    <p className="text-gray-300 mb-6">"{testimonial.content}"</p>
+                    <p className="text-gray-100 mb-6 leading-relaxed">"{testimonial.content}"</p>
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center text-sm font-bold">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center text-sm font-bold shadow-lg">
                         {testimonial.avatar}
                       </div>
                       <div>
                         <div className="font-semibold text-white">{testimonial.name}</div>
-                        <div className="text-sm text-gray-400">{testimonial.role} at {testimonial.company}</div>
+                        <div className="text-sm text-gray-200">{testimonial.role} at {testimonial.company}</div>
                       </div>
                     </div>
                   </CardContent>
@@ -577,33 +542,38 @@ Style: Engaging storytelling with data-backed insights`}
             viewport={{ once: true }}
             className="relative"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/30 to-pink-500/30 blur-3xl" />
-            <Card className="relative bg-gradient-to-br from-purple-900/20 to-pink-900/20 border-purple-800/50 backdrop-blur-xl p-12">
-              <h2 className="text-4xl md:text-5xl font-bold mb-4 text-white">
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/40 to-pink-500/40 blur-3xl" />
+            <Card className="relative bg-gradient-to-br from-purple-900/40 to-pink-900/40 border-purple-400/30 backdrop-blur-xl p-12 shadow-2xl">
+              <h2 className="text-4xl md:text-5xl font-bold mb-4 text-white drop-shadow-lg">
                 Ready to Transform Your AI Experience?
               </h2>
-              <p className="text-xl text-gray-300 mb-8">
+              <p className="text-xl text-gray-100 mb-8 drop-shadow-md">
                 Join the revolution in prompt engineering. Start creating amazing prompts today.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+
+              {/* Developer Attribution */}
+              <div className="mb-8 p-6 rounded-xl bg-gradient-to-r from-blue-900/40 to-purple-900/40 border border-blue-400/40 backdrop-blur-md shadow-lg">
+                <p className="text-lg text-gray-100 flex items-center justify-center gap-2 font-medium">
+                  💻 Crafted with passion by
+                  <span className="bg-gradient-to-r from-blue-300 to-purple-300 bg-clip-text text-transparent font-bold text-xl">
+                    @Talktodre-ops
+                  </span>
+                  - Your AI Development Partner
+                </p>
+                <p className="text-sm text-gray-200 mt-2 text-center">
+                  🌟 Follow my journey building cutting-edge AI tools for the community!
+                </p>
+              </div>
+              <div className="flex justify-center">
                 <Button
                   size="lg"
-                  className="px-8 py-6 text-lg font-bold bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                  className="px-12 py-8 text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-2xl shadow-purple-500/25 hover:shadow-purple-500/40 group"
                   onClick={onStart}
                 >
-                  <Unlock className="mr-2 h-5 w-5" />
-                  Get Started Free
+                  <Unlock className="mr-3 h-6 w-6 group-hover:scale-110 transition-transform" />
+                  🎯 Start Creating Amazing Prompts Now - FREE!
+                  <Sparkles className="ml-3 h-6 w-6 group-hover:scale-110 transition-transform" />
                 </Button>
-                <Link href="/pricing">
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="px-8 py-6 text-lg font-bold border-2 border-white/30 bg-white/5 backdrop-blur-md hover:bg-white/10"
-                  >
-                    <Award className="mr-2 h-5 w-5" />
-                    View Pricing
-                  </Button>
-                </Link>
               </div>
             </Card>
           </motion.div>

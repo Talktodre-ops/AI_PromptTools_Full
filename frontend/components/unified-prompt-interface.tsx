@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils"
 interface UnifiedPromptInterfaceProps {
   onResults: (results: any[]) => void
   results: any[]
+  onTabChange?: (tab: string) => void
 }
 
 interface PromptCard {
@@ -116,12 +117,17 @@ const examplePrompts: PromptCard[] = [
   }
 ]
 
-export default function UnifiedPromptInterface({ onResults, results }: UnifiedPromptInterfaceProps) {
+export default function UnifiedPromptInterface({ onResults, results, onTabChange }: UnifiedPromptInterfaceProps) {
   const [activeTab, setActiveTab] = useState("text")
   const [selectedPrompt, setSelectedPrompt] = useState<PromptCard | null>(null)
   const [favoritePrompts, setFavoritePrompts] = useState<string[]>([])
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
+
+  // Call onTabChange when activeTab changes
+  useEffect(() => {
+    onTabChange?.(activeTab)
+  }, [activeTab, onTabChange])
 
   // Get unique categories for filter
   const categories = [...new Set(examplePrompts.map(p => p.category))]

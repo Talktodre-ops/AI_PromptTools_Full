@@ -1,11 +1,11 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Star, Heart, Copy, ExternalLink, ArrowLeft, TrendingUp } from 'lucide-react'
+import { Star, Heart, Copy, ExternalLink, ArrowLeft, TrendingUp, Linkedin, Twitter, Instagram, Mail, Github } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from "@/lib/utils"
 import { supabase, isSupabaseConfigured } from '@/lib/supabase-client'
@@ -43,7 +43,6 @@ const samplePrompts: PromptGalleryData[] = [
 
 export default function GalleryPage() {
   const [prompts, setPrompts] = useState<PromptGalleryData[]>([])
-  const [filteredPrompts, setFilteredPrompts] = useState<PromptGalleryData[]>([])
   const [categories, setCategories] = useState<Array<{ name: string; count: number }>>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
@@ -110,25 +109,22 @@ export default function GalleryPage() {
       try {
         setLoading(true)
 
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 1000))
-
         // If Supabase isn't configured, fallback to sample data
         if (!isSupabaseConfigured() || !supabase) {
           const fallbackData = samplePrompts
           setPrompts(fallbackData)
           const extractedCategories = extractCategoriesFromTitles(fallbackData)
           setCategories(extractedCategories)
-          setFilteredPrompts(fallbackData)
           toast.message('Supabase not configured. Using sample data.')
           return
         }
 
-        // Fetch real data from Supabase
+        // Fetch real data from Supabase - optimized query
         const { data, error } = await supabase
           .from('prompt-gallery')
-          .select('*')
+          .select('id, "prompt-title", "prompt-content", views, likes, rating, rating_count, created_at')
           .order('id')
+          .limit(500) // Limit initial load for performance
 
         if (error) {
           console.error('Supabase error details:', error)
@@ -139,7 +135,6 @@ export default function GalleryPage() {
           // Don't fallback to sample data - show empty state instead
           setPrompts([])
           setCategories([{ name: 'All Prompts', count: 0 }])
-          setFilteredPrompts([])
         } else {
           // Use real database data
           const realData = data || []
@@ -149,7 +144,6 @@ export default function GalleryPage() {
           const extractedCategories = extractCategoriesFromTitles(realData)
           setCategories(extractedCategories)
 
-          setFilteredPrompts(realData)
           toast.success(`✅ Loaded ${realData.length} prompts from Supabase database`)
         }
       } catch (error) {
@@ -163,8 +157,8 @@ export default function GalleryPage() {
     loadPrompts()
   }, [])
 
-  // Filter prompts based on search and category
-  useEffect(() => {
+  // Optimized filtering with useMemo
+  const filteredPrompts = useMemo(() => {
     let filtered = prompts
 
     // Filter by category
@@ -182,16 +176,17 @@ export default function GalleryPage() {
 
     // Filter by search query
     if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase()
       filtered = filtered.filter(prompt =>
-        prompt['prompt-title'].toLowerCase().includes(searchQuery.toLowerCase()) ||
-        prompt['prompt-content'].toLowerCase().includes(searchQuery.toLowerCase())
+        prompt['prompt-title'].toLowerCase().includes(query) ||
+        prompt['prompt-content'].toLowerCase().includes(query)
       )
     }
 
-    setFilteredPrompts(filtered)
+    return filtered
   }, [prompts, selectedCategory, searchQuery])
 
-  const handleCopyPrompt = async (prompt: PromptGalleryData) => {
+  const handleCopyPrompt = useCallback(async (prompt: PromptGalleryData) => {
     try {
       await navigator.clipboard.writeText(prompt['prompt-content'])
 
@@ -210,9 +205,9 @@ export default function GalleryPage() {
     } catch (error) {
       toast.error('Failed to copy prompt')
     }
-  }
+  }, [])
 
-  const handleLikePrompt = async (prompt: PromptGalleryData) => {
+  const handleLikePrompt = useCallback(async (prompt: PromptGalleryData) => {
     try {
       const isLiked = likedPrompts.has(prompt.id)
 
@@ -252,9 +247,9 @@ export default function GalleryPage() {
     } catch (error) {
       toast.error('Failed to update likes')
     }
-  }
+  }, [likedPrompts])
 
-  const handleOpenWithAI = (prompt: PromptGalleryData) => {
+  const handleOpenWithAI = useCallback((prompt: PromptGalleryData) => {
     const selectedAI = localStorage.getItem('selectedAI')
     let aiData = { name: 'ChatGPT', url: 'https://chat.openai.com/' }
 
@@ -305,7 +300,7 @@ export default function GalleryPage() {
     trackPromptView(prompt.id)
     window.open(finalUrl, '_blank')
     toast.success(`Opening with ${aiData.name}...`)
-  }
+  }, [])
 
   const trackPromptView = async (promptId: number) => {
     try {
@@ -329,15 +324,92 @@ export default function GalleryPage() {
     return ((id * 47 + 123) % 5000) + 100
   }
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-400 mx-auto mb-4"></div>
-          <p className="text-gray-400">Loading prompts from database...</p>
+  // Loading skeleton component
+  const LoadingSkeleton = () => (
+    <div className="bg-gray-900 text-white min-h-screen">
+      {/* Header skeleton */}
+      <header className="bg-gray-800/90 backdrop-blur-md border-b border-gray-700 px-6 py-4 fixed top-0 left-0 right-0 z-50">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="w-16 h-8 bg-gray-700 rounded animate-pulse"></div>
+            <div className="w-32 h-6 bg-gray-700 rounded animate-pulse"></div>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="w-24 h-8 bg-gray-700 rounded animate-pulse"></div>
+            <div className="w-16 h-4 bg-gray-700 rounded animate-pulse"></div>
+          </div>
+        </div>
+        {/* AI badges skeleton */}
+        <div className="flex gap-2 mt-3">
+          {[...Array(8)].map((_, i) => (
+            <div key={i} className="w-16 h-6 bg-gray-700 rounded animate-pulse"></div>
+          ))}
+        </div>
+      </header>
+
+      <div className="pt-[120px] min-h-screen">
+        <div className="flex">
+          {/* Sidebar skeleton */}
+          <aside className="w-60 bg-gray-800 border-r border-gray-700 h-screen overflow-y-auto p-4 fixed top-[120px] bottom-0">
+            <div className="mb-6">
+              <div className="w-full h-10 bg-gray-700 rounded animate-pulse"></div>
+            </div>
+            <div className="space-y-1">
+              {[...Array(8)].map((_, i) => (
+                <div key={i} className="w-full h-8 bg-gray-700 rounded animate-pulse"></div>
+              ))}
+            </div>
+          </aside>
+
+          {/* Main content skeleton */}
+          <main className="flex-1 p-6 ml-60 pb-20">
+            <div className="mb-6">
+              <div className="w-64 h-4 bg-gray-700 rounded animate-pulse"></div>
+            </div>
+
+            {/* Grid skeleton */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[...Array(12)].map((_, i) => (
+                <div key={i} className="bg-gray-800 border border-gray-700 rounded-lg p-4">
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="w-3/4 h-4 bg-gray-700 rounded animate-pulse"></div>
+                    <div className="flex gap-1">
+                      <div className="w-6 h-6 bg-gray-700 rounded animate-pulse"></div>
+                      <div className="w-6 h-6 bg-gray-700 rounded animate-pulse"></div>
+                      <div className="w-6 h-6 bg-gray-700 rounded animate-pulse"></div>
+                    </div>
+                  </div>
+                  <div className="mb-4 space-y-2">
+                    <div className="w-full h-3 bg-gray-700 rounded animate-pulse"></div>
+                    <div className="w-full h-3 bg-gray-700 rounded animate-pulse"></div>
+                    <div className="w-3/4 h-3 bg-gray-700 rounded animate-pulse"></div>
+                  </div>
+                  <div className="flex gap-1 flex-wrap mb-3">
+                    <div className="w-16 h-5 bg-gray-700 rounded animate-pulse"></div>
+                    <div className="w-12 h-5 bg-gray-700 rounded animate-pulse"></div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1">
+                      {[...Array(5)].map((_, j) => (
+                        <div key={j} className="w-3 h-3 bg-gray-700 rounded animate-pulse"></div>
+                      ))}
+                    </div>
+                    <div className="flex gap-2">
+                      <div className="w-8 h-4 bg-gray-700 rounded animate-pulse"></div>
+                      <div className="w-8 h-4 bg-gray-700 rounded animate-pulse"></div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </main>
         </div>
       </div>
-    )
+    </div>
+  )
+
+  if (loading) {
+    return <LoadingSkeleton />
   }
 
   return (
@@ -443,7 +515,7 @@ export default function GalleryPage() {
         </aside>
 
           {/* Main Content */}
-          <main className="flex-1 p-6 ml-60">
+          <main className="flex-1 p-6 ml-60 pb-20">
           {/* Results count */}
           <div className="mb-6">
             <p className="text-gray-400 text-sm">
@@ -590,6 +662,72 @@ export default function GalleryPage() {
           </main>
         </div>
       </div>
+
+      {/* Static Footer */}
+      <footer className="fixed bottom-0 left-0 right-0 z-40 bg-gray-800/90 backdrop-blur-md border-t border-gray-700">
+        <div className="max-w-7xl mx-auto px-4 py-3">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            {/* Developer Attribution */}
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-gray-400">Built with</span>
+              <Heart className="h-4 w-4 text-red-500 fill-current" />
+              <span className="text-gray-400">by</span>
+              <span className="bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent font-bold">
+                @Talktodre-ops
+              </span>
+            </div>
+
+            {/* Social Links */}
+            <div className="flex items-center gap-3">
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-8 w-8 p-0 text-gray-400 hover:text-blue-400 hover:bg-blue-400/10"
+                onClick={() => window.open('https://linkedin.com/in/talktodre-ops', '_blank')}
+              >
+                <Linkedin className="h-4 w-4" />
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-8 w-8 p-0 text-gray-400 hover:text-blue-400 hover:bg-blue-400/10"
+                onClick={() => window.open('https://twitter.com/talktodre_ops', '_blank')}
+              >
+                <Twitter className="h-4 w-4" />
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-8 w-8 p-0 text-gray-400 hover:text-pink-400 hover:bg-pink-400/10"
+                onClick={() => window.open('https://instagram.com/talktodre_ops', '_blank')}
+              >
+                <Instagram className="h-4 w-4" />
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-8 w-8 p-0 text-gray-400 hover:text-green-400 hover:bg-green-400/10"
+                onClick={() => window.open('mailto:contact@talktodre-ops.dev', '_blank')}
+              >
+                <Mail className="h-4 w-4" />
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-8 w-8 p-0 text-gray-400 hover:text-yellow-400 hover:bg-yellow-400/10"
+                onClick={() => window.open('https://github.com/Talktodre-ops/AI_PromptTools_Full', '_blank')}
+              >
+                <Github className="h-4 w-4" />
+              </Button>
+            </div>
+
+            {/* Contact for collaboration */}
+            <div className="text-xs text-gray-500">
+              Open for collaboration • AI Development Partner
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   )
 }

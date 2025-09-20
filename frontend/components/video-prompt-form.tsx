@@ -20,6 +20,7 @@ const TOOLS = [
 	{ value: "runway", label: "Runway ML", description: "Professional video generation", icon: "🎬" },
 	{ value: "pika", label: "Pika Labs", description: "Creative and artistic", icon: "🎨" },
 	{ value: "sora", label: "OpenAI Sora", description: "Narrative storytelling", icon: "📖" },
+	{ value: "veo3", label: "Google VEO3", description: "Google's latest video AI model", icon: "🚀" },
 ]
 
 const CAMERA_ANGLES = [
