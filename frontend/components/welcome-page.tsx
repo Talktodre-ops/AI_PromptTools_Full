@@ -16,6 +16,7 @@ import {
   Rocket,
   Target,
   Lightbulb,
+  Film,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -74,6 +75,12 @@ export default function WelcomePage({ onStart }: WelcomePageProps) {
       description: "Step-by-step reasoning prompts for complex problem solving",
       gradient: "from-purple-400 to-pink-500",
     },
+    {
+      icon: <Rocket className="h-6 w-6 sm:h-8 sm:w-8" />,
+      title: "Video Prompt",
+      description: "Cinematic video prompts optimized for AI video generation tools",
+      gradient: "from-red-400 to-rose-500",
+    },
   ]
 
   const benefits = [
@@ -101,6 +108,10 @@ export default function WelcomePage({ onStart }: WelcomePageProps) {
 
 Use a tone that creates urgency without inducing despair, and include credible data points to support your arguments.`
 
+  const videoExampleBefore = "a drone flying over a forest at sunrise"
+  
+  const videoExampleAfter = `Aerial drone shot soaring over a lush, misty forest at sunrise. Golden morning light filters through the canopy, casting long shadows across the landscape. The camera moves slowly and steadily, gradually ascending to reveal the vastness of the woodland stretching to the horizon. Soft fog hovers between the trees, creating a dreamlike atmosphere. Cinematic color grading with warm golden tones. 4K ultra HD resolution with film grain. Smooth, gentle camera movement with slight panning. Epic, majestic mood with a nature documentary aesthetic.`
+
   return (
     <div className="w-full min-h-screen overflow-x-hidden">
       {/* Hero Section - Adjusted for mobile */}
@@ -126,7 +137,7 @@ Use a tone that creates urgency without inducing despair, and include credible d
                   className="px-3 py-1.5 sm:px-6 sm:py-3 text-sm sm:text-base font-medium bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20 transition-all duration-300"
                 >
                   <Sparkles className="h-3.5 w-3.5 sm:h-5 sm:w-5 mr-2 animate-pulse" />
-                  AI-Powered Prompt Engineering
+                  PROMPTHERO - AI-Powered Prompt Engineering
                 </Badge>
 
                 {/* Title - Adjusted font sizes and spacing */}
@@ -153,10 +164,19 @@ Use a tone that creates urgency without inducing despair, and include credible d
                     size="lg"
                     className="w-full sm:w-auto px-8 sm:px-10 py-4 sm:py-6 text-lg sm:text-xl font-semibold bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 transform hover:scale-105 transition-all duration-300 shadow-2xl border-0"
                   >
-                    Start Creating Prompts
+                    Create Text Prompts
                     <ArrowRight className="ml-2 sm:ml-3 h-5 w-5 sm:h-6 sm:w-6" />
                   </Button>
                 </div>
+                <Link href="/video-prompt">
+                  <Button
+                    size="lg"
+                    className="w-full sm:w-auto px-8 sm:px-10 py-4 sm:py-6 text-lg sm:text-xl font-semibold bg-gradient-to-r from-rose-500 to-purple-500 hover:from-rose-600 hover:to-purple-600 transform hover:scale-105 transition-all duration-300 shadow-2xl border-0"
+                  >
+                    Create Video Prompts
+                    <Film className="ml-2 sm:ml-3 h-5 w-5 sm:h-6 sm:w-6" />
+                  </Button>
+                </Link>
                 <Button
                   variant="outline"
                   size="lg"
@@ -166,6 +186,7 @@ Use a tone that creates urgency without inducing despair, and include credible d
                   <Star className="mr-2 sm:mr-3 h-5 w-5 sm:h-6 sm:w-6" />
                   See Examples
                 </Button>
+
               </div>
 
               {/* Stats - Already responsive */}
@@ -216,7 +237,7 @@ Use a tone that creates urgency without inducing despair, and include credible d
 
           <div className="w-full max-w-6xl mx-auto">
             <Tabs value={activeExample} onValueChange={setActiveExample} className="w-full">
-              <TabsList className="grid w-full max-w-sm sm:max-w-md mx-auto grid-cols-2 mb-8 sm:mb-12 h-12 sm:h-14 bg-slate-100 dark:bg-slate-800">
+              <TabsList className="grid w-full max-w-sm sm:max-w-md mx-auto grid-cols-3 mb-8 sm:mb-12 h-12 sm:h-14 bg-slate-100 dark:bg-slate-800">
                 <TabsTrigger
                   value="before"
                   className="text-base sm:text-lg font-semibold data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700"
@@ -228,6 +249,12 @@ Use a tone that creates urgency without inducing despair, and include credible d
                   className="text-base sm:text-lg font-semibold data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700"
                 >
                   After
+                </TabsTrigger>
+                <TabsTrigger
+                  value="video"
+                  className="text-base sm:text-lg font-semibold data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700"
+                >
+                  Video
                 </TabsTrigger>
               </TabsList>
 
@@ -290,6 +317,45 @@ Use a tone that creates urgency without inducing despair, and include credible d
                   </CardContent>
                 </Card>
               </TabsContent>
+              
+              <TabsContent value="video" className="mt-0">
+                <Card className="border-rose-200 dark:border-rose-800 shadow-xl transform hover:scale-[1.02] transition-all duration-300 bg-white dark:bg-slate-800">
+                  <CardHeader className="pb-4 sm:pb-6">
+                    <CardTitle className="text-rose-600 dark:text-rose-400 flex items-center text-xl sm:text-2xl">
+                      <span className="w-3 h-3 sm:w-4 sm:h-4 bg-rose-500 rounded-full mr-3 sm:mr-4 animate-pulse"></span>
+                      Video Prompt
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pb-6 sm:pb-8">
+                    <div className="mb-6">
+                      <h4 className="text-lg font-medium mb-2 text-slate-700 dark:text-slate-300">Original Input:</h4>
+                      <p className="text-base sm:text-lg text-slate-700 dark:text-slate-300 italic bg-slate-50 dark:bg-slate-900 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
+                        "{videoExampleBefore}"
+                      </p>
+                    </div>
+                    <div>
+                      <h4 className="text-lg font-medium mb-2 text-slate-700 dark:text-slate-300">Refined Video Prompt:</h4>
+                      <pre className="text-sm sm:text-base text-slate-700 dark:text-slate-300 whitespace-pre-wrap bg-slate-50 dark:bg-slate-900 p-4 sm:p-6 rounded-lg mb-4 sm:mb-6 overflow-x-auto border border-slate-200 dark:border-slate-700">
+                        {videoExampleAfter}
+                      </pre>
+                    </div>
+                    <div className="space-y-2 text-base sm:text-lg text-slate-500 dark:text-slate-400">
+                      <div className="flex items-center">
+                        <span className="text-rose-500 mr-3">✅</span>
+                        Detailed visual elements and camera movements
+                      </div>
+                      <div className="flex items-center">
+                        <span className="text-rose-500 mr-3">✅</span>
+                        Cinematic style and atmosphere described
+                      </div>
+                      <div className="flex items-center">
+                        <span className="text-rose-500 mr-3">✅</span>
+                        Optimized for AI video generation tools
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
             </Tabs>
           </div>
         </div>
@@ -345,7 +411,7 @@ Use a tone that creates urgency without inducing despair, and include credible d
               <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 dark:text-slate-100">
                 Why Use{" "}
                 <span className="bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">
-                  Prompt Engineer?
+                  PROMPTHERO?
                 </span>
               </h2>
               <div className="space-y-4 sm:space-y-6">

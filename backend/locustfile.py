@@ -1,4 +1,4 @@
-from locust import HttpUser, task, between
+from locust import HttpUser, task, between  # type: ignore
 import logging
 import json
 import time
@@ -76,6 +76,22 @@ class PromptUser(HttpUser):
             "/explain", 
             {
                 "prompt": "Follow up email"  # Shorter prompt
+            }
+        )
+    
+    @task(2)  # Add a new task for video prompts
+    def video_prompt(self):
+        self.make_request_with_retry(
+            "post",
+            "/video", 
+            {
+                "raw_input": "drone flying over a forest",  # Shorter prompt
+                "camera_angle": "aerial",
+                "lighting": "natural",
+                "movement": "static",
+                "style": "cinematic",
+                "tone": "default",
+                "return_format": "plain"
             }
         )
     

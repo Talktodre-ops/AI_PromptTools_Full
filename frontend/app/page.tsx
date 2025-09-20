@@ -2,153 +2,184 @@
 
 import { useState, useEffect, Suspense } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
-import type { Prompt } from "@/types"
+import Link from "next/link"
 import PromptForm from "@/components/prompt-form"
 import PromptResults from "@/components/prompt-results"
-import WelcomePage from "@/components/welcome-page"
+import WelcomePage from "@/components/welcome-page-premium"
+import UnifiedPromptInterface from "@/components/unified-prompt-interface"
 import { Toaster } from "@/components/ui/toaster"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, Film, Image, Github, Sparkles, Linkedin, Twitter, Instagram, Mail, Heart } from "lucide-react"
+import { motion } from "framer-motion"
 
-// Client component that uses useSearchParams
-function PageContent() {
-  const [results, setResults] = useState<Prompt[]>([])
+export default function Page() {
+  const [results, setResults] = useState<any[]>([])
   const [hasStarted, setHasStarted] = useState(false)
+  const [currentPromptType, setCurrentPromptType] = useState("text")
   const searchParams = useSearchParams()
   const router = useRouter()
 
-  // Check URL parameters on initial load
   useEffect(() => {
+    // Load states
     const view = searchParams.get('view')
-    if (view === 'prompt') {
-      setHasStarted(true)
-    }
+    setHasStarted(view === 'prompt' || localStorage.getItem('hasStarted') === 'true')
   }, [searchParams])
 
-  // Load state from localStorage on initial render
   useEffect(() => {
-    // Check if we're in the browser environment
-    if (typeof window !== 'undefined') {
-      // Load hasStarted state from URL first, then localStorage as fallback
-      const view = searchParams.get('view')
-      if (view === 'prompt') {
-        setHasStarted(true)
-      } else {
-        const savedHasStarted = localStorage.getItem('hasStarted')
-        if (savedHasStarted === 'true') {
-          setHasStarted(true)
-          // Update URL to match state
-          router.push('/?view=prompt')
-        }
-      }
+    if (hasStarted) router.push('/?view=prompt')
+    localStorage.setItem('hasStarted', hasStarted.toString())
+  }, [hasStarted, router])
 
-      // Load results if they exist
-      const savedResults = localStorage.getItem('promptResults')
-      if (savedResults) {
-        try {
-          const parsedResults = JSON.parse(savedResults)
-          setResults(parsedResults)
-        } catch (e) {
-          console.error('Error parsing saved results:', e)
-        }
-      }
+  const handleStart = () => setHasStarted(true)
+  const handleBack = () => setHasStarted(false)
+  const handleTabChange = (tab: string) => setCurrentPromptType(tab)
+
+  const getHeaderText = () => {
+    switch (currentPromptType) {
+      case "video":
+        return "Video Prompt Generator"
+      case "image":
+        return "Image Prompt Generator"
+      default:
+        return "Text Prompt Generator"
     }
-  }, [router, searchParams])
-
-  // Save state to localStorage whenever it changes
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('hasStarted', hasStarted.toString())
-    }
-  }, [hasStarted])
-
-  useEffect(() => {
-    if (typeof window !== 'undefined' && results.length > 0) {
-      localStorage.setItem('promptResults', JSON.stringify(results))
-    }
-  }, [results])
-
-  // Debug results changes with useEffect instead of inline console.log
-  useEffect(() => {
-    console.log('Current results:', results)
-  }, [results])
-
-  const handleResults = (newResults: Prompt[]) => {
-    console.log('Setting new results:', newResults)
-    setResults(newResults)
   }
 
-  const handleStart = () => {
-    setHasStarted(true)
-    // Update URL with query parameter instead of path
-    router.push('/?view=prompt')
-  }
-
-  const handleBack = () => {
-    setHasStarted(false)
-    // Update URL to remove query parameter
-    router.push('/')
-  }
-
-  if (!hasStarted) {
-    return <WelcomePage onStart={handleStart} />
-  }
+  if (!hasStarted) return <WelcomePage onStart={handleStart} />
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
-      <div className="container mx-auto px-4 py-4 md:py-12 max-w-5xl">
-        {/* Back button */}
-        <div className="mb-4">
-          <Button 
-            variant="ghost" 
-            onClick={handleBack}
-            className="flex items-center text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Welcome
-          </Button>
-        </div>
-        
-        {/* Reduced top padding for mobile and adjusted spacing */}
-        <header className="mb-6 md:mb-8 text-center space-y-3 pt-4 md:pt-8">
-          <h1 className="text-2xl md:text-4xl font-bold text-slate-800 dark:text-slate-100">
-            Prompt Engineer
-          </h1>
-          <p className="text-sm md:text-lg text-slate-600 dark:text-slate-400 max-w-xl mx-auto leading-relaxed">
-            Transform your messy thoughts into high-quality, ready-to-use AI prompts
-          </p>
-        </header>
+    <main className="min-h-screen bg-black">
+      {/* Premium Hero with glassmorphism */}
+      <motion.section
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="relative py-16 overflow-hidden"
+      >
+        {/* Animated gradient background */}
+        <div className="absolute inset-0 animated-gradient opacity-30" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/50 to-black" />
 
-        <div className="grid gap-6 md:gap-8 mt-6 md:mt-8">
-          <PromptForm onResults={handleResults} />
-          <div className="min-h-[100px]">
-            {results.length > 0 ? (
-              <Suspense fallback={<div className="h-32 flex items-center justify-center">Loading results...</div>}>
-                <PromptResults results={results} />
-              </Suspense>
-            ) : null}
+        {/* Glass card effect */}
+        <div className="relative z-10 max-w-4xl mx-auto text-center px-4">
+          <div className="glass rounded-2xl p-8 backdrop-blur-2xl border border-white/10">
+            <h1 className="text-5xl md:text-7xl font-black mb-4 bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 bg-clip-text text-transparent animate-gradient-x">
+              {getHeaderText()}
+            </h1>
+            <p className="text-xl text-gray-300">Craft perfect AI prompts with our advanced builder</p>
           </div>
         </div>
+      </motion.section>
+
+      {/* Full width container with minimal padding and bottom spacing for footer */}
+      <div className="w-full px-2 md:px-4 pb-20">
+        {/* Floating navigation */}
+        <motion.div
+          className="flex justify-between mb-6"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+        >
+          <Button
+            variant="ghost"
+            onClick={handleBack}
+            className="glass backdrop-blur-md border border-white/10 text-white hover:bg-white/10"
+          >
+            <ArrowLeft className="mr-2" /> Back
+          </Button>
+          <div className="flex gap-3">
+            <Button
+              onClick={() => router.push('/gallery')}
+              className="glass backdrop-blur-md border border-white/10 bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-white hover:from-purple-500/30 hover:to-pink-500/30"
+            >
+              <Sparkles className="mr-2 h-4 w-4" /> Gallery
+            </Button>
+            <Button
+              onClick={() => window.open('https://github.com/Talktodre-ops/AI_PromptTools_Full', '_blank')}
+              className="glass backdrop-blur-md border border-white/10 text-white hover:bg-white/10"
+            >
+              <Github className="mr-2 h-4 w-4" /> GitHub
+            </Button>
+          </div>
+        </motion.div>
+
+        {/* Full width unified prompt interface */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="w-full"
+        >
+          <UnifiedPromptInterface onResults={setResults} results={results} onTabChange={handleTabChange} />
+        </motion.div>
+
       </div>
+
+      {/* Static Footer */}
+      <footer className="fixed bottom-0 left-0 right-0 z-40 bg-black/90 backdrop-blur-md border-t border-white/10">
+        <div className="max-w-7xl mx-auto px-4 py-3">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            {/* Developer Attribution */}
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-gray-400">Built with</span>
+              <Heart className="h-4 w-4 text-red-500 fill-current" />
+              <span className="text-gray-400">by</span>
+              <span className="bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent font-bold">
+                @Talktodre-ops
+              </span>
+            </div>
+
+            {/* Social Links */}
+            <div className="flex items-center gap-3">
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-8 w-8 p-0 text-gray-400 hover:text-blue-400 hover:bg-blue-400/10"
+                onClick={() => window.open('https://linkedin.com/in/talktodre-ops', '_blank')}
+              >
+                <Linkedin className="h-4 w-4" />
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-8 w-8 p-0 text-gray-400 hover:text-blue-400 hover:bg-blue-400/10"
+                onClick={() => window.open('https://twitter.com/talktodre_ops', '_blank')}
+              >
+                <Twitter className="h-4 w-4" />
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-8 w-8 p-0 text-gray-400 hover:text-pink-400 hover:bg-pink-400/10"
+                onClick={() => window.open('https://instagram.com/talktodre_ops', '_blank')}
+              >
+                <Instagram className="h-4 w-4" />
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-8 w-8 p-0 text-gray-400 hover:text-green-400 hover:bg-green-400/10"
+                onClick={() => window.open('mailto:contact@talktodre-ops.dev', '_blank')}
+              >
+                <Mail className="h-4 w-4" />
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-8 w-8 p-0 text-gray-400 hover:text-yellow-400 hover:bg-yellow-400/10"
+                onClick={() => window.open('https://github.com/Talktodre-ops/AI_PromptTools_Full', '_blank')}
+              >
+                <Github className="h-4 w-4" />
+              </Button>
+            </div>
+
+            {/* Contact for collaboration */}
+            <div className="text-xs text-gray-500">
+              Open for collaboration • AI Development Partner
+            </div>
+          </div>
+        </div>
+      </footer>
       <Toaster />
     </main>
-  )
-}
-
-// Main page component with Suspense boundary
-export default function Page() {
-  return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-4">Loading...</h1>
-          <div className="w-48 h-1 bg-slate-200 dark:bg-slate-700 rounded-full mx-auto overflow-hidden">
-            <div className="bg-indigo-500 h-full animate-progress"></div>
-          </div>
-        </div>
-      </div>
-    }>
-      <PageContent />
-    </Suspense>
   )
 }

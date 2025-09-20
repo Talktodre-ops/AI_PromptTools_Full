@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep:*)",
+      "Bash(python:*)",
+      "WebFetch(domain:prompts.chat)",
+      "WebFetch(domain:github.com)",
+      "Bash(npm run dev:*)",
+      "Bash(curl:*)",
+      "Bash(npm install:*)",
+      "Bash(node:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

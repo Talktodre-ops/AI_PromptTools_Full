@@ -12,10 +12,11 @@ from collections import defaultdict
 
 # Add the parent directory to sys.path to allow imports from sibling directories
 sys.path.append(str(Path(__file__).parent.parent))
-from routers import refine, explain
+from routers import refine, explain, video, users, analytics, image, gallery
+from services.supabase_service import SupabaseService
 
 app = FastAPI(
-    title="Prompt Engineering API",
+    title="PROMPTHERO API",
     description="API for generating and refining AI prompts",
     version="1.0.0",
 )
@@ -58,7 +59,7 @@ rate_limiter = RateLimiter(rate_limit=50, time_window=60)
 # Add rate limiter middleware
 @app.middleware("http")
 async def rate_limit_middleware(request: Request, call_next):
-    client_ip = request.client.host
+    client_ip = request.client.host if request.client else "127.0.0.1"
     
     # Skip rate limiting for health check endpoints
     if request.url.path in ["/", "/health"]:
@@ -91,28 +92,32 @@ async def add_process_time_header(request: Request, call_next):
             content={"detail": f"Internal server error: {str(e)}"}
         )
 
-# Global exception handler
-@app.exception_handler(Exception)
-async def global_exception_handler(request: Request, exc: Exception):
-    print(f"Global exception: {str(exc)}")
-    print(traceback.format_exc())
+# Handle validation errors
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request, exc):
     return JSONResponse(
-        status_code=500,
-        content={"detail": f"Internal server error: {str(exc)}"}
+        status_code=400,
+        content={"detail": f"Validation error: {str(exc)}"}
     )
 
-# Validation error handler
-@app.exception_handler(RequestValidationError)
-async def validation_exception_handler(request: Request, exc: RequestValidationError):
-    print(f"Validation error: {exc.errors()}")
+# Handle generic exceptions
+@app.exception_handler(Exception)
+async def generic_exception_handler(request, exc):
+    # Log the exception
+    traceback.print_exc()
     return JSONResponse(
-        status_code=422,
-        content={"detail": exc.errors()}
+        status_code=500,
+        content={"detail": f"An unexpected error occurred: {str(exc)}"}
     )
 
 # Include routers
 app.include_router(refine.router)
 app.include_router(explain.router)
+app.include_router(video.router)
+app.include_router(users.router)
+app.include_router(analytics.router)
+app.include_router(image.router, tags=["image"])
+app.include_router(gallery.router, tags=["gallery"])
 
 # Add a root endpoint for API health check
 @app.get("/")
@@ -122,9 +127,38 @@ async def root():
 # Add a health check endpoint
 @app.get("/health")
 async def health_check():
+    supabase_client = SupabaseService.get_client()
+    supabase_status = "connected" if supabase_client else "not configured"
+    
     return {
         "status": "healthy",
         "services": {
-            "gemini_api": "connected" if os.getenv("GEMINI_API_KEY") else "not configured"
+            "gemini_api": "connected" if os.getenv("GEMINI_API_KEY") else "not configured",
+            "supabase": supabase_status
         }
     }
+
+# Startup event
+@app.on_event("startup")
+async def startup_event():
+    # Check for required environment variables
+    required_vars = ["GEMINI_API_KEY", "SUPABASE_URL", "SUPABASE_ANON_KEY", "DATABASE_URL"]
+    missing_vars = []
+    for var in required_vars:
+        if not os.getenv(var):
+            missing_vars.append(var)
+    
+    if missing_vars:
+        print("WARNING: Missing environment variables:", ", ".join(missing_vars))
+    
+    # Check Supabase connection
+    supabase_client = SupabaseService.get_client()
+    if not supabase_client:
+        print("WARNING: Supabase connection not established")
+    else:
+        print("OK Connected to Supabase successfully")
+
+# Shutdown event
+@app.on_event("shutdown")
+async def shutdown_event():
+    print("Shutting down API server...")

@@ -1,10 +1,20 @@
 import requests
 import time
 import json
+import unittest
+from fastapi.testclient import TestClient
+import os
+from unittest.mock import patch, MagicMock
+from Backend.main import app
 
 # Configuration
 BASE_URL = "http://localhost:8000"  # Change this to your actual API URL
 TIMEOUT = 10  # seconds
+
+client = TestClient(app)
+
+# Mock environment variables for testing
+os.environ["GEMINI_API_KEY"] = "fake_api_key_for_testing"
 
 def test_health():
     """Test the health endpoint"""
@@ -49,16 +59,93 @@ def test_refine():
         print(f"Refine test failed: {str(e)}")
         return False
 
-if __name__ == "__main__":
-    print("Testing API endpoints...")
-    health_ok = test_health()
+class TestAPI(unittest.TestCase):
     
-    if health_ok:
-        refine_ok = test_refine()
+    def test_root(self):
+        response = client.get("/")
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data["status"], "API is running")
         
-        if refine_ok:
-            print("\n✅ All tests passed!")
-        else:
-            print("\n❌ Refine endpoint test failed")
-    else:
-        print("\n❌ Health endpoint test failed") 
+    def test_health_check(self):
+        response = client.get("/health")
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data["status"], "healthy")
+        self.assertEqual(data["services"]["gemini_api"], "connected")
+    
+    @patch('services.gemini_service.GEMINI_MODEL')
+    def test_refine_prompt(self, mock_model):
+        # Setup mock
+        mock_response = MagicMock()
+        mock_response.text = "This is a refined prompt"
+        mock_model.generate_content_async.return_value = mock_response
+        
+        # Test data
+        test_data = {
+            "raw_input": "test prompt",
+            "mode": "basic",
+            "tone": "default",
+            "persona": "",
+            "return_format": "plain"
+        }
+        
+        # Make request
+        response = client.post("/refine", json=test_data)
+        
+        # Check response
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertIn("refined_prompts", data)
+        self.assertIsInstance(data["refined_prompts"], list)
+    
+    @patch('services.gemini_service.GEMINI_MODEL')
+    def test_explain_prompt(self, mock_model):
+        # Setup mock
+        mock_response = MagicMock()
+        mock_response.text = "This is an explanation"
+        mock_model.generate_content_async.return_value = mock_response
+        
+        # Test data
+        test_data = {
+            "prompt": "test prompt"
+        }
+        
+        # Make request
+        response = client.post("/explain", json=test_data)
+        
+        # Check response
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertIn("explanation", data)
+        self.assertIsInstance(data["explanation"], str)
+    
+    @patch('services.gemini_service.GEMINI_MODEL')
+    def test_video_prompt(self, mock_model):
+        # Setup mock
+        mock_response = MagicMock()
+        mock_response.text = "This is a video prompt"
+        mock_model.generate_content_async.return_value = mock_response
+        
+        # Test data
+        test_data = {
+            "raw_input": "a drone flying over a forest",
+            "camera_angle": "aerial",
+            "lighting": "golden-hour",
+            "movement": "tracking",
+            "style": "cinematic",
+            "tone": "dramatic",
+            "return_format": "plain"
+        }
+        
+        # Make request
+        response = client.post("/video", json=test_data)
+        
+        # Check response
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertIn("refined_prompts", data)
+        self.assertIsInstance(data["refined_prompts"], list)
+        
+if __name__ == "__main__":
+    unittest.main() 

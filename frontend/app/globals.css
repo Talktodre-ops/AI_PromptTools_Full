@@ -23,12 +23,17 @@
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
-    --radius: 0.5rem;
+    --radius: 0.75rem;
     --chart-1: 12 76% 61%;
     --chart-2: 173 58% 39%;
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
+    --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    --gradient-3: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    --gradient-4: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    --gradient-5: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
   }
 
   .dark {
@@ -79,19 +84,108 @@
   min-height: 100dvh; /* Dynamic viewport height for mobile */
 }
 
+/* Premium glassmorphism effect */
+.glass {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.glass-dark {
+  background: rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Premium gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Animated gradient background */
+.animated-gradient {
+  background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+  background-size: 400% 400%;
+  animation: gradient-shift 15s ease infinite;
+}
+
+/* Premium shadows */
+.premium-shadow {
+  box-shadow: 0 20px 60px -15px rgba(0, 0, 0, 0.3);
+}
+
+.premium-shadow-lg {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25),
+              0 0 50px -15px rgba(120, 119, 198, 0.3);
+}
+
+/* Neon glow effects */
+.neon-glow {
+  box-shadow: 0 0 20px rgba(120, 119, 198, 0.5),
+              0 0 40px rgba(120, 119, 198, 0.3),
+              0 0 60px rgba(120, 119, 198, 0.1);
+}
+
 /* Custom animations */
 @keyframes blob {
   0% {
-    transform: translate(0px, 0px) scale(1);
+    transform: translate(0px, 0px) scale(1) rotate(0deg);
   }
   33% {
-    transform: translate(30px, -50px) scale(1.1);
+    transform: translate(30px, -50px) scale(1.1) rotate(120deg);
   }
   66% {
-    transform: translate(-20px, 20px) scale(0.9);
+    transform: translate(-20px, 20px) scale(0.9) rotate(240deg);
   }
   100% {
-    transform: translate(0px, 0px) scale(1);
+    transform: translate(0px, 0px) scale(1) rotate(360deg);
+  }
+}
+
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
   }
 }
 
@@ -117,7 +211,7 @@
 }
 
 .animate-blob {
-  animation: blob 7s infinite;
+  animation: blob 20s infinite;
 }
 
 .animate-gradient-x {
@@ -128,6 +222,20 @@
   animation: progress 2s linear forwards;
 }
 
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
 .animation-delay-2000 {
   animation-delay: 2s;
 }
@@ -136,27 +244,120 @@
   animation-delay: 4s;
 }
 
+.animation-delay-6000 {
+  animation-delay: 6s;
+}
+
+/* Premium hover effects */
+.hover-lift {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-lift:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.3);
+}
+
+/* Premium button styles */
+.btn-premium {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-premium::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.btn-premium:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+/* Text reveal animation */
+@keyframes text-reveal {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+.text-reveal {
+  animation: text-reveal 1s cubic-bezier(0.77, 0, 0.175, 1) forwards;
+}
+
 /* Smooth scrolling */
 html {
   scroll-behavior: smooth;
 }
 
-/* Custom scrollbar */
+/* Premium custom scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: linear-gradient(180deg, #f0f0f0, #e0e0e0);
+  border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #888;
-  border-radius: 3px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #555;
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Premium loading skeleton */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.2) 20%,
+    rgba(255, 255, 255, 0.5) 60%,
+    rgba(255, 255, 255, 0)
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* Magnetic button effect */
+.magnetic {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Parallax layers */
+.parallax-slow {
+  transform: translateZ(-1px) scale(1.5);
+}
+
+.parallax-medium {
+  transform: translateZ(-2px) scale(2);
+}
+
+.parallax-fast {
+  transform: translateZ(-3px) scale(2.5);
 }
 
 /* Ensure proper stacking and no overlap */
