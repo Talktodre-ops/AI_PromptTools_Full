@@ -4,6 +4,7 @@ from services.gemini_service import generate_refined_prompts, build_video_prompt
 from services.supabase_service import SupabaseService
 from routers.users import get_current_user
 from typing import Optional, Dict, Any
+import logging
 
 router = APIRouter()
 
@@ -69,7 +70,21 @@ async def generate_video_prompt(
             "",  # No persona for video prompts
             request.return_format
         )
-        
+
+        # Check if the response indicates an error
+        if (isinstance(refined_prompts, list) and len(refined_prompts) > 0 and
+            isinstance(refined_prompts[0], str) and
+            "Sorry, something went wrong" in refined_prompts[0]):
+
+            # Log the actual error for debugging
+            logging.error(f"Video prompt generation failed for user {current_user['id']}: {refined_prompts[0]}")
+
+            # Return generic error to client
+            raise HTTPException(
+                status_code=500,
+                detail="Failed to generate video prompts. Please try again later."
+            )
+
         # Save prompt in the background
         background_tasks.add_task(
             save_video_prompt_to_db,
@@ -91,11 +106,21 @@ async def generate_video_prompt(
                 "context_details": request.context_details
             }
         )
-        
+
         return {"refined_prompts": refined_prompts}
-        
+
+    except HTTPException:
+        # Re-raise HTTP exceptions
+        raise
     except Exception as e:
-        return {"error": f"Failed to generate video prompt: {str(e)}"}
+        # Log the actual error for debugging
+        logging.error(f"Unexpected error in generate_video_prompt for user {current_user['id']}: {str(e)}")
+
+        # Return generic error to client
+        raise HTTPException(
+            status_code=500,
+            detail="An unexpected error occurred while generating video prompts. Please try again later."
+        )
 
 @router.post("/video/quick")
 async def generate_quick_video_prompt(
@@ -172,7 +197,21 @@ async def generate_quick_video_prompt(
             "",
             "plain"
         )
-        
+
+        # Check if the response indicates an error
+        if (isinstance(refined_prompts, list) and len(refined_prompts) > 0 and
+            isinstance(refined_prompts[0], str) and
+            "Sorry, something went wrong" in refined_prompts[0]):
+
+            # Log the actual error for debugging
+            logging.error(f"Quick video prompt generation failed for user {current_user['id']}: {refined_prompts[0]}")
+
+            # Return generic error to client
+            raise HTTPException(
+                status_code=500,
+                detail="Failed to generate quick video prompts. Please try again later."
+            )
+
         # Save prompt in the background
         background_tasks.add_task(
             save_video_prompt_to_db,
@@ -192,11 +231,21 @@ async def generate_quick_video_prompt(
                 "quality": template["quality"]
             }
         )
-        
+
         return {"refined_prompts": refined_prompts}
-        
+
+    except HTTPException:
+        # Re-raise HTTP exceptions
+        raise
     except Exception as e:
-        return {"error": f"Failed to generate quick video prompt: {str(e)}"}
+        # Log the actual error for debugging
+        logging.error(f"Unexpected error in generate_quick_video_prompt for user {current_user['id']}: {str(e)}")
+
+        # Return generic error to client
+        raise HTTPException(
+            status_code=500,
+            detail="An unexpected error occurred while generating quick video prompts. Please try again later."
+        )
 
 @router.get("/video/templates")
 async def get_video_templates():

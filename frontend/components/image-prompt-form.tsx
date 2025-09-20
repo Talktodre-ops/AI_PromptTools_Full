@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
@@ -83,11 +83,26 @@ export default function ImagePromptForm({ onResults }: { onResults: (results: Pr
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [useCase, setUseCase] = useState("general")
 
+  // Cleanup object URL on unmount
+  useEffect(() => {
+    return () => {
+      if (imagePreview && imagePreview.startsWith('blob:')) {
+        URL.revokeObjectURL(imagePreview)
+      }
+    }
+  }, [imagePreview])
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (file) {
+    if (file && file.type.startsWith('image/')) {
+      // Clean up previous object URL
+      if (imagePreview && imagePreview.startsWith('blob:')) {
+        URL.revokeObjectURL(imagePreview)
+      }
+
       setImageFile(file)
-      setImagePreview(URL.createObjectURL(file))
+      const objectUrl = URL.createObjectURL(file)
+      setImagePreview(objectUrl)
     }
   }
 
@@ -207,7 +222,7 @@ export default function ImagePromptForm({ onResults }: { onResults: (results: Pr
 
             <TabsContent value="from-image" className="space-y-4">
               <Input type="file" onChange={handleFileChange} accept="image/*" />
-              {imagePreview && <img src={imagePreview} alt="Preview" className="w-full h-auto rounded-lg"/>}
+              {imagePreview && imagePreview.startsWith('blob:') && <img src={imagePreview} alt="Preview" className="w-full h-auto rounded-lg"/>}
               <Select value={useCase} onValueChange={setUseCase}>
                 <SelectTrigger><SelectValue/></SelectTrigger>
                 <SelectContent>

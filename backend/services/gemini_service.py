@@ -22,7 +22,7 @@ GEMINI_VIDEO_MODEL: Optional[Any] = None  # Specialized model for video prompts
 
 if API_KEY:
     try:
-        print(f"Attempting to create Gemini models with API key: {API_KEY[:10]}...")
+        print("Attempting to create Gemini models...")
         
         # Use dictionary-based configuration for better compatibility
         generation_config: Dict[str, Any] = {

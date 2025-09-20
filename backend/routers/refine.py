@@ -5,6 +5,7 @@ from services.supabase_service import SupabaseService
 from routers.users import get_current_user
 from typing import Dict, Any, List, Optional
 import uuid
+import logging
 
 router = APIRouter()
 
@@ -23,27 +24,55 @@ async def refine_prompt(
         )
     
     # Generate prompts
-    refined_prompts = await generate_refined_prompts(
-        request.raw_input,
-        request.mode,
-        request.tone,
-        request.persona,
-        request.return_format
-    )
-    
-    # Save prompt in the background
-    background_tasks.add_task(
-        save_prompt_to_db,
-        current_user["id"],
-        request.raw_input,
-        refined_prompts,
-        request.mode,
-        request.tone,
-        request.persona,
-        request.return_format
-    )
-    
-    return {"refined_prompts": refined_prompts}
+    try:
+        refined_prompts = await generate_refined_prompts(
+            request.raw_input,
+            request.mode,
+            request.tone,
+            request.persona,
+            request.return_format
+        )
+
+        # Check if the response indicates an error
+        if (isinstance(refined_prompts, list) and len(refined_prompts) > 0 and
+            isinstance(refined_prompts[0], str) and
+            "Sorry, something went wrong" in refined_prompts[0]):
+
+            # Log the actual error for debugging
+            logging.error(f"Prompt generation failed for user {current_user['id']}: {refined_prompts[0]}")
+
+            # Return generic error to client
+            raise HTTPException(
+                status_code=500,
+                detail="Failed to generate refined prompts. Please try again later."
+            )
+
+        # Save prompt in the background
+        background_tasks.add_task(
+            save_prompt_to_db,
+            current_user["id"],
+            request.raw_input,
+            refined_prompts,
+            request.mode,
+            request.tone,
+            request.persona,
+            request.return_format
+        )
+
+        return {"refined_prompts": refined_prompts}
+
+    except HTTPException:
+        # Re-raise HTTP exceptions
+        raise
+    except Exception as e:
+        # Log the actual error for debugging
+        logging.error(f"Unexpected error in refine_prompt for user {current_user['id']}: {str(e)}")
+
+        # Return generic error to client
+        raise HTTPException(
+            status_code=500,
+            detail="An unexpected error occurred. Please try again later."
+        )
 
 @router.get("/prompts")
 async def get_user_prompts(
