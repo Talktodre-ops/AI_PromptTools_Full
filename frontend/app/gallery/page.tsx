@@ -415,40 +415,43 @@ export default function GalleryPage() {
   return (
     <div className="bg-gray-900 text-white min-h-screen">
       {/* Header */}
-      <header className="bg-gray-800/90 backdrop-blur-md border-b border-gray-700 px-6 py-4 fixed top-0 left-0 right-0 z-50">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
+      <header className="bg-gray-800/90 backdrop-blur-md border-b border-gray-700 px-3 sm:px-6 py-3 sm:py-4 fixed top-0 left-0 right-0 z-50">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0">
+          <div className="flex items-center gap-2 sm:gap-4">
             <Button
               variant="ghost"
               onClick={() => window.history.back()}
-              className="text-gray-300 hover:text-white hover:bg-gray-700"
+              className="text-gray-300 hover:text-white hover:bg-gray-700 text-sm sm:text-base"
             >
-              <ArrowLeft className="mr-2 h-4 w-4" /> Back
+              <ArrowLeft className="mr-1 sm:mr-2 h-3 sm:h-4 w-3 sm:w-4" /> Back
             </Button>
             <div className="flex items-center gap-2">
-              <h1 className="text-xl font-semibold text-green-400">Prompt Gallery</h1>
+              <h1 className="text-lg sm:text-xl font-semibold text-green-400">Prompt Gallery</h1>
             </div>
           </div>
-          <div className="flex items-center gap-4 text-sm text-gray-300">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-300">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => window.open('https://github.com/Talktodre-ops/AI_PromptTools_Full', '_blank')}
-              className="text-yellow-400 hover:text-yellow-300 hover:bg-yellow-400/10 border border-yellow-400/30 hover:border-yellow-400/50 transition-all duration-200"
+              className="text-yellow-400 hover:text-yellow-300 hover:bg-yellow-400/10 border border-yellow-400/30 hover:border-yellow-400/50 transition-all duration-200 w-fit"
             >
-              <Star className="mr-2 h-4 w-4 fill-current" />
-              Star on GitHub
+              <Star className="mr-1 sm:mr-2 h-3 sm:h-4 w-3 sm:w-4 fill-current" />
+              <span className="hidden sm:inline">Star on GitHub</span>
+              <span className="sm:hidden">Star</span>
             </Button>
-            <span className="flex items-center gap-1">
-              <span className="text-green-400">✓</span> powered by supabase
-            </span>
-            <span className="text-green-400">{prompts.length}</span>
-            <span>browse <strong>{prompts.length}</strong> AI prompts for <strong>everyone</strong></span>
+            <div className="flex items-center gap-2 sm:gap-4 text-xs">
+              <span className="flex items-center gap-1">
+                <span className="text-green-400">✓</span> <span className="hidden sm:inline">powered by</span> supabase
+              </span>
+              <span className="text-green-400">{prompts.length}</span>
+              <span className="hidden sm:inline">browse <strong>{prompts.length}</strong> AI prompts for <strong>everyone</strong></span>
+            </div>
           </div>
         </div>
 
         {/* AI Model Selection */}
-        <div className="flex gap-2 mt-3">
+        <div className="flex flex-wrap gap-1 sm:gap-2 mt-2 sm:mt-3">
           {[
             { name: 'ChatGPT', url: 'https://chat.openai.com/', color: 'from-green-500 to-emerald-500' },
             { name: 'Claude', url: 'https://claude.ai/', color: 'from-orange-500 to-red-500' },
@@ -462,7 +465,7 @@ export default function GalleryPage() {
             <Badge
               key={ai.name}
               className={cn(
-                `bg-gradient-to-r ${ai.color} text-white text-xs px-3 py-1 cursor-pointer transition-all duration-200 border-0`,
+                `bg-gradient-to-r ${ai.color} text-white text-xs px-2 sm:px-3 py-1 cursor-pointer transition-all duration-200 border-0`,
                 selectedAI === ai.name
                   ? "scale-105 ring-2 ring-white/30 shadow-lg"
                   : "hover:opacity-80 hover:scale-105"
@@ -480,11 +483,21 @@ export default function GalleryPage() {
         </div>
       </header>
 
-      <div className="pt-[120px] min-h-screen">
-        <div className="flex">
-          {/* Left Sidebar */}
-          <aside className="w-60 bg-gray-800 border-r border-gray-700 h-screen overflow-y-auto p-4 fixed top-[120px] bottom-0">
-          {/* Search */}
+      <div className="pt-[140px] sm:pt-[120px] min-h-screen">
+        <div className="block lg:flex">
+          {/* Mobile Search Bar */}
+          <div className="lg:hidden p-3 sm:p-4 bg-gray-800 border-b border-gray-700">
+            <Input
+              placeholder="Search prompts..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
+            />
+          </div>
+
+          {/* Left Sidebar - Hidden on mobile */}
+          <aside className="hidden lg:block w-60 bg-gray-800 border-r border-gray-700 h-screen overflow-y-auto p-4 fixed top-[120px] bottom-0">
+          {/* Search - Desktop only */}
           <div className="mb-6">
             <Input
               placeholder="Search prompts..."
@@ -514,39 +527,58 @@ export default function GalleryPage() {
           </div>
         </aside>
 
+        {/* Mobile Categories Dropdown */}
+        <div className="lg:hidden p-3 sm:p-4 bg-gray-800 border-b border-gray-700">
+          <select
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            className="w-full bg-gray-700 border-gray-600 text-white rounded-md px-3 py-2 text-sm"
+          >
+            {categories.map(category => (
+              <option key={category.name} value={category.name}>
+                {category.name} ({category.count})
+              </option>
+            ))}
+          </select>
+        </div>
+
           {/* Main Content */}
-          <main className="flex-1 p-6 ml-60 pb-20">
+          <main className="flex-1 p-3 sm:p-6 lg:ml-60 pb-20">
           {/* Results count */}
-          <div className="mb-6">
-            <p className="text-gray-400 text-sm">
-              Showing {filteredPrompts.length} prompts from prompt-gallery table
-              {selectedCategory !== 'All Prompts' && ` in "${selectedCategory}"`}
-              {searchQuery && ` matching "${searchQuery}"`}
+          <div className="mb-4 sm:mb-6">
+            <p className="text-gray-400 text-xs sm:text-sm">
+              Showing {filteredPrompts.length} prompts
+              {selectedCategory !== 'All Prompts' && (
+                <span className="hidden sm:inline"> in "{selectedCategory}"</span>
+              )}
+              {searchQuery && (
+                <span className="hidden sm:inline"> matching "{searchQuery}"</span>
+              )}
             </p>
           </div>
 
           {/* Prompts Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4">
             {filteredPrompts.map((prompt, index) => (
               <motion.div
                 key={prompt.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.05 }}
-                className="bg-gray-800 border border-gray-700 rounded-lg p-4 hover:border-gray-600 transition-colors"
+                className="bg-gray-800 border border-gray-700 rounded-lg p-3 sm:p-4 hover:border-gray-600 transition-colors"
               >
                 {/* Card Header */}
-                <div className="flex justify-between items-start mb-3">
-                  <h3 className="text-white font-medium text-sm leading-tight">
+                <div className="flex justify-between items-start mb-2 sm:mb-3">
+                  <h3 className="text-white font-medium text-xs sm:text-sm leading-tight pr-2 flex-1">
                     {prompt['prompt-title']}
                   </h3>
-                  <div className="flex gap-1 ml-2">
+                  <div className="flex gap-1 flex-shrink-0">
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => handleCopyPrompt(prompt)}
                       className={cn(
-                        "h-6 w-6 p-0 transition-all duration-200",
+                        "h-5 w-5 sm:h-6 sm:w-6 p-0 transition-all duration-200",
                         copiedPrompts.has(prompt.id)
                           ? "text-green-400 hover:text-green-300 bg-green-400/20"
                           : "text-gray-400 hover:text-white hover:bg-gray-700"
@@ -557,7 +589,7 @@ export default function GalleryPage() {
                         animate={copiedPrompts.has(prompt.id) ? { scale: [1, 1.2, 1] } : { scale: 1 }}
                         transition={{ duration: 0.3 }}
                       >
-                        <Copy className="h-3 w-3" />
+                        <Copy className="h-2.5 sm:h-3 w-2.5 sm:w-3" />
                       </motion.div>
                     </Button>
                     <Button
@@ -565,7 +597,7 @@ export default function GalleryPage() {
                       size="sm"
                       onClick={() => handleLikePrompt(prompt)}
                       className={cn(
-                        "h-6 w-6 p-0 transition-all duration-200",
+                        "h-5 w-5 sm:h-6 sm:w-6 p-0 transition-all duration-200",
                         likedPrompts.has(prompt.id)
                           ? "text-red-400 hover:text-red-300 bg-red-400/20"
                           : "text-gray-400 hover:text-white hover:bg-gray-700"
@@ -577,7 +609,7 @@ export default function GalleryPage() {
                         transition={{ duration: 0.3 }}
                       >
                         <Heart className={cn(
-                          "h-3 w-3 transition-all duration-200",
+                          "h-2.5 sm:h-3 w-2.5 sm:w-3 transition-all duration-200",
                           likedPrompts.has(prompt.id) ? "fill-current" : ""
                         )} />
                       </motion.div>
@@ -586,35 +618,35 @@ export default function GalleryPage() {
                       variant="ghost"
                       size="sm"
                       onClick={() => handleOpenWithAI(prompt)}
-                      className="h-6 w-6 p-0 text-gray-400 hover:text-white hover:bg-gray-700"
+                      className="h-5 w-5 sm:h-6 sm:w-6 p-0 text-gray-400 hover:text-white hover:bg-gray-700"
                       title="Open with AI"
                     >
-                      <ExternalLink className="h-3 w-3" />
+                      <ExternalLink className="h-2.5 sm:h-3 w-2.5 sm:w-3" />
                     </Button>
                   </div>
                 </div>
 
                 {/* Prompt Content */}
-                <div className="mb-4">
-                  <p className="text-gray-300 text-xs leading-relaxed line-clamp-4">
+                <div className="mb-3 sm:mb-4">
+                  <p className="text-gray-300 text-xs leading-relaxed line-clamp-3 sm:line-clamp-4">
                     {prompt['prompt-content']}
                   </p>
                 </div>
 
                 {/* Tags (extract from content) */}
-                <div className="flex gap-1 flex-wrap mb-3">
+                <div className="flex gap-1 flex-wrap mb-2 sm:mb-3">
                   {prompt['prompt-title'].toLowerCase().includes('act as') && (
-                    <Badge className="bg-gray-700 text-gray-300 text-xs px-2 py-0.5 border-0">
+                    <Badge className="bg-gray-700 text-gray-300 text-xs px-1.5 sm:px-2 py-0.5 border-0">
                       role-play
                     </Badge>
                   )}
                   {prompt['prompt-content'].toLowerCase().includes('code') && (
-                    <Badge className="bg-gray-700 text-gray-300 text-xs px-2 py-0.5 border-0">
+                    <Badge className="bg-gray-700 text-gray-300 text-xs px-1.5 sm:px-2 py-0.5 border-0">
                       coding
                     </Badge>
                   )}
                   {prompt['prompt-content'].toLowerCase().includes('write') && (
-                    <Badge className="bg-gray-700 text-gray-300 text-xs px-2 py-0.5 border-0">
+                    <Badge className="bg-gray-700 text-gray-300 text-xs px-1.5 sm:px-2 py-0.5 border-0">
                       writing
                     </Badge>
                   )}
@@ -627,25 +659,25 @@ export default function GalleryPage() {
                       <Star
                         key={star}
                         className={cn(
-                          "h-3 w-3",
+                          "h-2.5 sm:h-3 w-2.5 sm:w-3",
                           star <= Math.floor(prompt.rating || 0)
                             ? "fill-yellow-400 text-yellow-400"
                             : "text-gray-600"
                         )}
                       />
                     ))}
-                    <span className="text-xs text-gray-400 ml-1">
+                    <span className="text-xs text-gray-400 ml-1 hidden sm:inline">
                       {prompt.rating?.toFixed(1) || '0.0'} ({prompt.rating_count || 0})
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-gray-500">
-                    <div className="flex items-center gap-1">
-                      <TrendingUp className="h-3 w-3" />
-                      {prompt.views || 0}
+                  <div className="flex items-center gap-1 sm:gap-2 text-xs text-gray-500">
+                    <div className="flex items-center gap-0.5 sm:gap-1">
+                      <TrendingUp className="h-2.5 sm:h-3 w-2.5 sm:w-3" />
+                      <span className="text-xs">{prompt.views || 0}</span>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <Heart className="h-3 w-3" />
-                      {prompt.likes || 0}
+                    <div className="flex items-center gap-0.5 sm:gap-1">
+                      <Heart className="h-2.5 sm:h-3 w-2.5 sm:w-3" />
+                      <span className="text-xs">{prompt.likes || 0}</span>
                     </div>
                   </div>
                 </div>
@@ -665,12 +697,12 @@ export default function GalleryPage() {
 
       {/* Static Footer */}
       <footer className="fixed bottom-0 left-0 right-0 z-40 bg-gray-800/90 backdrop-blur-md border-t border-gray-700">
-        <div className="max-w-7xl mx-auto px-4 py-3">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 py-2 sm:py-3">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-4">
             {/* Developer Attribution */}
-            <div className="flex items-center gap-2 text-sm">
+            <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
               <span className="text-gray-400">Built with</span>
-              <Heart className="h-4 w-4 text-red-500 fill-current" />
+              <Heart className="h-3 sm:h-4 w-3 sm:w-4 text-red-500 fill-current" />
               <span className="text-gray-400">by</span>
               <span className="bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent font-bold">
                 @Talktodre-ops
@@ -678,52 +710,52 @@ export default function GalleryPage() {
             </div>
 
             {/* Social Links */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               <Button
                 size="sm"
                 variant="ghost"
-                className="h-8 w-8 p-0 text-gray-400 hover:text-blue-400 hover:bg-blue-400/10"
-                onClick={() => window.open('https://linkedin.com/in/talktodre-ops', '_blank')}
+                className="h-6 w-6 sm:h-8 sm:w-8 p-0 text-gray-400 hover:text-blue-400 hover:bg-blue-400/10"
+                onClick={() => window.open('https://www.linkedin.com/in/talktodre35/', '_blank')}
               >
-                <Linkedin className="h-4 w-4" />
+                <Linkedin className="h-3 sm:h-4 w-3 sm:w-4" />
               </Button>
               <Button
                 size="sm"
                 variant="ghost"
-                className="h-8 w-8 p-0 text-gray-400 hover:text-blue-400 hover:bg-blue-400/10"
-                onClick={() => window.open('https://twitter.com/talktodre_ops', '_blank')}
+                className="h-6 w-6 sm:h-8 sm:w-8 p-0 text-gray-400 hover:text-blue-400 hover:bg-blue-400/10"
+                onClick={() => window.open('https://x.com/talktodre100', '_blank')}
               >
-                <Twitter className="h-4 w-4" />
+                <Twitter className="h-3 sm:h-4 w-3 sm:w-4" />
               </Button>
               <Button
                 size="sm"
                 variant="ghost"
-                className="h-8 w-8 p-0 text-gray-400 hover:text-pink-400 hover:bg-pink-400/10"
-                onClick={() => window.open('https://instagram.com/talktodre_ops', '_blank')}
+                className="h-6 w-6 sm:h-8 sm:w-8 p-0 text-gray-400 hover:text-pink-400 hover:bg-pink-400/10"
+                onClick={() => window.open('https://www.instagram.com/talktodree/', '_blank')}
               >
-                <Instagram className="h-4 w-4" />
+                <Instagram className="h-3 sm:h-4 w-3 sm:w-4" />
               </Button>
               <Button
                 size="sm"
                 variant="ghost"
-                className="h-8 w-8 p-0 text-gray-400 hover:text-green-400 hover:bg-green-400/10"
-                onClick={() => window.open('mailto:contact@talktodre-ops.dev', '_blank')}
+                className="h-6 w-6 sm:h-8 sm:w-8 p-0 text-gray-400 hover:text-green-400 hover:bg-green-400/10"
+                onClick={() => window.open('mailto:talktodre100@yahoo.com', '_blank')}
               >
-                <Mail className="h-4 w-4" />
+                <Mail className="h-3 sm:h-4 w-3 sm:w-4" />
               </Button>
               <Button
                 size="sm"
                 variant="ghost"
-                className="h-8 w-8 p-0 text-gray-400 hover:text-yellow-400 hover:bg-yellow-400/10"
+                className="h-6 w-6 sm:h-8 sm:w-8 p-0 text-gray-400 hover:text-yellow-400 hover:bg-yellow-400/10"
                 onClick={() => window.open('https://github.com/Talktodre-ops/AI_PromptTools_Full', '_blank')}
               >
-                <Github className="h-4 w-4" />
+                <Github className="h-3 sm:h-4 w-3 sm:w-4" />
               </Button>
             </div>
 
             {/* Contact for collaboration */}
-            <div className="text-xs text-gray-500">
-              Open for collaboration • AI Development Partner
+            <div className="text-xs text-gray-500 text-center sm:text-left">
+              <span className="hidden sm:inline">Open for collaboration • </span>AI Development Partner
             </div>
           </div>
         </div>

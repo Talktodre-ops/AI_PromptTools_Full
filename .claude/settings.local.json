@@ -8,7 +8,17 @@
       "Bash(npm run dev:*)",
       "Bash(curl:*)",
       "Bash(npm install:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(mv:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npm run lint)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(pnpm install:*)",
+      "Bash(npm run build:*)",
+      "WebFetch(domain:ai-prompt-tools-full.vercel.app)",
+      "Read(//c/Users/VICTUS/Pictures/Screenshots/**)"
     ],
     "deny": [],
     "ask": []

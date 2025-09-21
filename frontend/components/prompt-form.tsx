@@ -218,20 +218,25 @@ export default function PromptForm({ onResults }: PromptFormProps) {
 			</CardHeader>
 			<CardContent className="p-6">
 				<Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-					<TabsList className="grid w-full grid-cols-3">
-						<TabsTrigger value="quick" className="flex items-center gap-2">
-							<Zap className="h-4 w-4" />
-							Quick Generate
-						</TabsTrigger>
-						<TabsTrigger value="builder" className="flex items-center gap-2">
-							<Wand2 className="h-4 w-4" />
-							Prompt Builder
-						</TabsTrigger>
-						<TabsTrigger value="templates" className="flex items-center gap-2">
-							<BookOpen className="h-4 w-4" />
-							Templates
-						</TabsTrigger>
-					</TabsList>
+					<div className="flex justify-center">
+						<TabsList className="glass backdrop-blur-2xl border border-white/10 bg-black/20 p-1 sm:p-2 rounded-2xl w-full max-w-2xl">
+							<TabsTrigger value="quick" className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 md:px-6 py-2 sm:py-3 rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/30 data-[state=active]:to-cyan-500/30 data-[state=active]:text-white text-gray-400 hover:text-white transition-all text-xs sm:text-sm flex-1 justify-center">
+								<Zap className="h-3 w-3 sm:h-4 sm:w-4" />
+								<span className="hidden sm:inline">Quick Generate</span>
+								<span className="sm:hidden">Quick</span>
+							</TabsTrigger>
+							<TabsTrigger value="builder" className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 md:px-6 py-2 sm:py-3 rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500/30 data-[state=active]:to-pink-500/30 data-[state=active]:text-white text-gray-400 hover:text-white transition-all text-xs sm:text-sm flex-1 justify-center">
+								<Wand2 className="h-3 w-3 sm:h-4 sm:w-4" />
+								<span className="hidden sm:inline">Prompt Builder</span>
+								<span className="sm:hidden">Builder</span>
+							</TabsTrigger>
+							<TabsTrigger value="templates" className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 md:px-6 py-2 sm:py-3 rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500/30 data-[state=active]:to-emerald-500/30 data-[state=active]:text-white text-gray-400 hover:text-white transition-all text-xs sm:text-sm flex-1 justify-center">
+								<BookOpen className="h-3 w-3 sm:h-4 sm:w-4" />
+								<span className="hidden sm:inline">Templates</span>
+								<span className="sm:hidden">Templates</span>
+							</TabsTrigger>
+						</TabsList>
+					</div>
 
 					<TabsContent value="quick" className="space-y-4">
 						<div className="space-y-4">
