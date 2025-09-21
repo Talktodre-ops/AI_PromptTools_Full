@@ -152,7 +152,7 @@ function PageContent() {
                   size="sm"
                   variant="ghost"
                   className="h-8 w-8 p-0 text-gray-400 hover:text-blue-400 hover:bg-blue-400/10"
-                  onClick={() => window.open('https://linkedin.com/in/talktodre-ops', '_blank')}
+                  onClick={() => window.open('https://www.linkedin.com/in/talktodre35/', '_blank')}
                 >
                   <Linkedin className="h-4 w-4" />
                 </Button>
@@ -160,7 +160,7 @@ function PageContent() {
                   size="sm"
                   variant="ghost"
                   className="h-8 w-8 p-0 text-gray-400 hover:text-blue-400 hover:bg-blue-400/10"
-                  onClick={() => window.open('https://twitter.com/talktodre_ops', '_blank')}
+                  onClick={() => window.open('https://x.com/talktodre100', '_blank')}
                 >
                   <Twitter className="h-4 w-4" />
                 </Button>
@@ -168,7 +168,7 @@ function PageContent() {
                   size="sm"
                   variant="ghost"
                   className="h-8 w-8 p-0 text-gray-400 hover:text-pink-400 hover:bg-pink-400/10"
-                  onClick={() => window.open('https://instagram.com/talktodre_ops', '_blank')}
+                  onClick={() => window.open('https://www.instagram.com/talktodree/', '_blank')}
                 >
                   <Instagram className="h-4 w-4" />
                 </Button>
@@ -176,7 +176,7 @@ function PageContent() {
                   size="sm"
                   variant="ghost"
                   className="h-8 w-8 p-0 text-gray-400 hover:text-green-400 hover:bg-green-400/10"
-                  onClick={() => window.open('mailto:contact@talktodre-ops.dev', '_blank')}
+                  onClick={() => window.open('mailto:talktodre100@yahoo.com', '_blank')}
                 >
                   <Mail className="h-4 w-4" />
                 </Button>
