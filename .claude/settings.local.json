@@ -18,7 +18,9 @@
       "Bash(pnpm install:*)",
       "Bash(npm run build:*)",
       "WebFetch(domain:ai-prompt-tools-full.vercel.app)",
-      "Read(//c/Users/VICTUS/Pictures/Screenshots/**)"
+      "Read(//c/Users/VICTUS/Pictures/Screenshots/**)",
+      "Bash(git rm:*)",
+      "Bash(git checkout:*)"
     ],
     "deny": [],
     "ask": []

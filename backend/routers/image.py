@@ -37,19 +37,35 @@ async def generate_prompt_from_text(request: ImagePromptRequest):
         **Additional Context:** {request.context or 'none'}
 
         **Instructions:**
-        1.  Start the prompt with `/imagine`.
-        2.  Generate a single, coherent paragraph that is highly optimized for {request.ai_tool or 'Midjourney'}.
-        3.  Incorporate vivid details about the subject, environment, lighting, color, and artistic style.
-        4.  If a use case like 'marketing' or a specific template is provided, the prompt must reflect that.
-        5.  Append relevant Midjourney parameters like `--ar`, `--style`, and `--v 6` at the end. For aspect ratio, use a common one like `2:3` or `16:9` unless the user implies otherwise.
-        
+        1.  Generate a single, coherent paragraph that is highly optimized for {request.ai_tool or 'Midjourney'}.
+        2.  Incorporate vivid details about the subject, environment, lighting, color, and artistic style.
+        3.  If a use case like 'marketing' or a specific template is provided, the prompt must reflect that.
+        4.  Append relevant Midjourney parameters like --ar, --style, and --v 6 at the end. For aspect ratio, use a common one like 2:3 or 16:9 unless the user implies otherwise.
+        5.  Do NOT include special characters like asterisks or other symbols that might cause regex errors.
+
         **Example Output Format:**
-        `/imagine [Detailed prompt paragraph] --ar 2:3 --style raw --v 6`
+        [Detailed prompt paragraph] --ar 2:3 --style raw --v 6
     """
     
     try:
         response = await GEMINI_MODEL.generate_content_async(system_prompt)
-        return {"prompt": response.text.strip()}
+        generated_prompt = response.text.strip()
+
+        # Clean up the response and format it better
+        # Remove any unwanted characters that might cause issues
+        cleaned_prompt = generated_prompt.replace('*', '').replace('`', '').strip()
+
+        return {
+            "prompt": cleaned_prompt,
+            "formatted_prompt": cleaned_prompt,
+            "user_input": {
+                "original_text": request.text_prompt,
+                "style": request.style or 'photorealistic',
+                "mood": request.mood or 'neutral',
+                "ai_tool": request.ai_tool or 'Midjourney'
+            },
+            "success": True
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating prompt: {e}")
 
@@ -74,8 +90,23 @@ async def generate_prompt_from_image(
             prompt_context += " The description should be suitable for a blog post or article."
 
         response = await GEMINI_MODEL.generate_content_async([prompt_context, image])
-        
-        return {"prompt": response.text.strip()}
+        generated_prompt = response.text.strip()
+
+        # Clean up the response and format it better
+        # Remove any unwanted characters that might cause issues
+        cleaned_prompt = generated_prompt.replace('*', '').replace('`', '').strip()
+
+        return {
+            "prompt": cleaned_prompt,
+            "formatted_prompt": cleaned_prompt,
+            "analysis_details": {
+                "use_case": use_case,
+                "style": style,
+                "filename": file.filename,
+                "content_type": file.content_type
+            },
+            "success": True
+        }
     except Exception as e:
         print(traceback.format_exc())
         raise HTTPException(status_code=500, detail=f"Error processing image: {e}") 

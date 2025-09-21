@@ -1,9 +1,7 @@
-from fastapi import APIRouter, BackgroundTasks, HTTPException, Depends
+from fastapi import APIRouter, BackgroundTasks, HTTPException
 from pydantic import BaseModel
 from services.gemini_service import generate_refined_prompts, build_video_prompt, build_commercial_prompt
-from services.supabase_service import SupabaseService
-from routers.users import get_current_user
-from typing import Optional, Dict, Any
+from typing import Optional
 import logging
 
 router = APIRouter()
@@ -30,17 +28,9 @@ class QuickVideoPromptRequest(BaseModel):
 async def generate_video_prompt(
     request: VideoPromptRequest,
     background_tasks: BackgroundTasks,
-    current_user: Dict[str, Any] = Depends(get_current_user)
 ):
-    """Generate enhanced video prompts with tool-specific optimization"""
-    
-    # Check usage quota
-    if current_user["usage_count"] >= current_user["usage_quota"]:
-        raise HTTPException(
-            status_code=403,
-            detail="Daily usage quota exceeded. Please upgrade your subscription."
-        )
-    
+    """Generate enhanced video prompts with tool-specific optimization. Authentication disabled for development."""
+
     try:
         # Check if this is a commercial template request
         if request.commercial_type:
@@ -61,7 +51,7 @@ async def generate_video_prompt(
                 request.raw_input,
                 request.tone
             )
-        
+
         # Generate refined prompts using the enhanced input
         refined_prompts = await generate_refined_prompts(
             enhanced_input,
@@ -77,35 +67,13 @@ async def generate_video_prompt(
             "Sorry, something went wrong" in refined_prompts[0]):
 
             # Log the actual error for debugging
-            logging.error(f"Video prompt generation failed for user {current_user['id']}: {refined_prompts[0]}")
+            logging.error(f"Video prompt generation failed: {refined_prompts[0]}")
 
             # Return generic error to client
             raise HTTPException(
                 status_code=500,
                 detail="Failed to generate video prompts. Please try again later."
             )
-
-        # Save prompt in the background
-        background_tasks.add_task(
-            save_video_prompt_to_db,
-            current_user["id"],
-            request.raw_input,
-            refined_prompts,
-            "video",
-            request.tone,
-            "",
-            request.return_format,
-            {
-                "tool_type": request.tool_type,
-                "style": request.style,
-                "camera_angle": request.camera_angle,
-                "lighting": request.lighting,
-                "movement": request.movement,
-                "quality": request.quality,
-                "commercial_type": request.commercial_type,
-                "context_details": request.context_details
-            }
-        )
 
         return {"refined_prompts": refined_prompts}
 
@@ -114,7 +82,7 @@ async def generate_video_prompt(
         raise
     except Exception as e:
         # Log the actual error for debugging
-        logging.error(f"Unexpected error in generate_video_prompt for user {current_user['id']}: {str(e)}")
+        logging.error(f"Unexpected error in generate_video_prompt: {str(e)}")
 
         # Return generic error to client
         raise HTTPException(
@@ -126,17 +94,9 @@ async def generate_video_prompt(
 async def generate_quick_video_prompt(
     request: QuickVideoPromptRequest,
     background_tasks: BackgroundTasks,
-    current_user: Dict[str, Any] = Depends(get_current_user)
 ):
-    """Generate quick video prompts with preset templates"""
-    
-    # Check usage quota
-    if current_user["usage_count"] >= current_user["usage_quota"]:
-        raise HTTPException(
-            status_code=403,
-            detail="Daily usage quota exceeded. Please upgrade your subscription."
-        )
-    
+    """Generate quick video prompts with preset templates. Authentication disabled for development."""
+
     try:
         # Quick template mapping
         quick_templates = {
@@ -148,52 +108,54 @@ async def generate_quick_video_prompt(
                 "quality": "cinematic"
             },
             "commercial": {
-                "tool_type": "runway",
+                "tool_type": "pika",
                 "style": "commercial",
                 "lighting": "studio",
                 "movement": "static",
                 "quality": "4k"
             },
             "social": {
-                "tool_type": "pika",
+                "tool_type": "runway",
                 "style": "modern",
                 "lighting": "natural",
-                "movement": "zoom",
+                "movement": "handheld",
                 "quality": "smooth"
             },
             "documentary": {
                 "tool_type": "sora",
-                "style": "documentary",
+                "style": "realistic",
                 "lighting": "natural",
-                "movement": "tracking",
+                "movement": "steady",
                 "quality": "film_grain"
             },
             "artistic": {
-                "tool_type": "pika",
+                "tool_type": "runway",
                 "style": "artistic",
-                "lighting": "neon",
-                "movement": "pan",
+                "lighting": "dramatic",
+                "movement": "creative",
                 "quality": "hdr"
             }
         }
-        
+
+        # Get template settings
         template = quick_templates.get(request.template_type, quick_templates["cinematic"])
-        
-        # Build enhanced prompt
+
+        # Build enhanced input using template
         enhanced_input = build_video_prompt(
             template["tool_type"],
             template["style"],
             template["movement"],
             template["lighting"],
             template["quality"],
-            request.raw_input
+            request.raw_input,
+            "professional"
         )
-        
+
         # Generate refined prompts
         refined_prompts = await generate_refined_prompts(
             enhanced_input,
             "video",
-            "default",
+            "professional",
             "",
             "plain"
         )
@@ -204,33 +166,13 @@ async def generate_quick_video_prompt(
             "Sorry, something went wrong" in refined_prompts[0]):
 
             # Log the actual error for debugging
-            logging.error(f"Quick video prompt generation failed for user {current_user['id']}: {refined_prompts[0]}")
+            logging.error(f"Quick video prompt generation failed: {refined_prompts[0]}")
 
             # Return generic error to client
             raise HTTPException(
                 status_code=500,
                 detail="Failed to generate quick video prompts. Please try again later."
             )
-
-        # Save prompt in the background
-        background_tasks.add_task(
-            save_video_prompt_to_db,
-            current_user["id"],
-            request.raw_input,
-            refined_prompts,
-            "video",
-            "default",
-            "",
-            "plain",
-            {
-                "template_type": request.template_type,
-                "tool_type": template["tool_type"],
-                "style": template["style"],
-                "lighting": template["lighting"],
-                "movement": template["movement"],
-                "quality": template["quality"]
-            }
-        )
 
         return {"refined_prompts": refined_prompts}
 
@@ -239,7 +181,7 @@ async def generate_quick_video_prompt(
         raise
     except Exception as e:
         # Log the actual error for debugging
-        logging.error(f"Unexpected error in generate_quick_video_prompt for user {current_user['id']}: {str(e)}")
+        logging.error(f"Unexpected error in generate_quick_video_prompt: {str(e)}")
 
         # Return generic error to client
         raise HTTPException(
@@ -249,94 +191,41 @@ async def generate_quick_video_prompt(
 
 @router.get("/video/templates")
 async def get_video_templates():
-    """Get available video prompt templates and options"""
-    
-    return {
-        "tools": [
-            {"value": "runway", "label": "Runway ML", "description": "Professional video generation with realistic motion"},
-            {"value": "pika", "label": "Pika Labs", "description": "Creative and artistic video generation"},
-            {"value": "sora", "label": "OpenAI Sora", "description": "Narrative storytelling and photorealistic scenes"}
-        ],
-        "styles": [
-            {"value": "cinematic", "label": "Cinematic", "description": "Professional film-like quality"},
-            {"value": "commercial", "label": "Commercial", "description": "Polished marketing style"},
-            {"value": "documentary", "label": "Documentary", "description": "Natural and authentic feel"},
-            {"value": "artistic", "label": "Artistic", "description": "Creative and experimental"},
-            {"value": "vintage", "label": "Vintage", "description": "Retro and nostalgic"},
-            {"value": "modern", "label": "Modern", "description": "Contemporary and sleek"}
-        ],
-        "camera_movements": [
-            {"value": "static", "label": "Static", "description": "Fixed camera position"},
-            {"value": "pan", "label": "Pan", "description": "Horizontal camera movement"},
-            {"value": "tilt", "label": "Tilt", "description": "Vertical camera movement"},
-            {"value": "zoom", "label": "Zoom", "description": "Focal length change"},
-            {"value": "dolly", "label": "Dolly", "description": "Camera depth movement"},
-            {"value": "tracking", "label": "Tracking", "description": "Following subject movement"},
-            {"value": "aerial", "label": "Aerial", "description": "Drone-like perspective"}
-        ],
-        "lighting_setups": [
-            {"value": "natural", "label": "Natural", "description": "Natural lighting conditions"},
-            {"value": "golden_hour", "label": "Golden Hour", "description": "Warm sunset/sunrise light"},
-            {"value": "blue_hour", "label": "Blue Hour", "description": "Cool twilight atmosphere"},
-            {"value": "studio", "label": "Studio", "description": "Controlled professional lighting"},
-            {"value": "low_key", "label": "Low Key", "description": "Dramatic shadows and contrast"},
-            {"value": "high_key", "label": "High Key", "description": "Bright and airy lighting"}
-        ],
-        "quality_specs": [
-            {"value": "4k", "label": "4K UHD", "description": "Ultra-high definition quality"},
-            {"value": "cinematic", "label": "Cinematic", "description": "Professional film quality"},
-            {"value": "hdr", "label": "HDR", "description": "High dynamic range"},
-            {"value": "film_grain", "label": "Film Grain", "description": "Authentic film texture"},
-            {"value": "smooth", "label": "Smooth", "description": "High frame rate motion"}
-        ],
-        "commercial_types": [
-            {"value": "product_showcase", "label": "Product Showcase", "description": "Highlight product features"},
-            {"value": "brand_story", "label": "Brand Story", "description": "Emotional brand narrative"},
-            {"value": "social_media", "label": "Social Media", "description": "Platform-optimized content"},
-            {"value": "explainer", "label": "Explainer", "description": "Educational and instructional"}
-        ],
-        "quick_templates": [
-            {"value": "cinematic", "label": "Cinematic", "description": "Professional film-like scenes"},
-            {"value": "commercial", "label": "Commercial", "description": "Marketing and advertising"},
-            {"value": "social", "label": "Social Media", "description": "Platform-ready content"},
-            {"value": "documentary", "label": "Documentary", "description": "Authentic storytelling"},
-            {"value": "artistic", "label": "Artistic", "description": "Creative and experimental"}
+    """Get available video template categories"""
+    templates = {
+        "categories": [
+            {
+                "id": "cinematic",
+                "name": "Cinematic",
+                "description": "Professional movie-style prompts with cinematic quality",
+                "icon": "film"
+            },
+            {
+                "id": "commercial",
+                "name": "Commercial",
+                "description": "Business and marketing video prompts",
+                "icon": "briefcase"
+            },
+            {
+                "id": "social",
+                "name": "Social Media",
+                "description": "Quick, engaging content for social platforms",
+                "icon": "share"
+            },
+            {
+                "id": "documentary",
+                "name": "Documentary",
+                "description": "Realistic, documentary-style prompts",
+                "icon": "camera"
+            },
+            {
+                "id": "artistic",
+                "name": "Artistic",
+                "description": "Creative and experimental video prompts",
+                "icon": "palette"
+            }
         ]
     }
+    return templates
 
-async def save_video_prompt_to_db(
-    user_id: str,
-    raw_input: str,
-    refined_prompts: list,
-    mode: str,
-    tone: str,
-    persona: str,
-    return_format: str,
-    metadata: dict
-):
-    """Save video prompt to database and update user stats."""
-    # Save the prompt
-    await SupabaseService.save_prompt(
-        user_id, raw_input, refined_prompts, mode, tone, persona, return_format
-    )
-    
-    # Track activity
-    await SupabaseService.track_activity(
-        user_id,
-        "video_prompt_generated",
-        None,
-        {
-            "tone": tone,
-            "prompt_length": len(raw_input),
-            "results_count": len(refined_prompts),
-            "tool_type": metadata.get("tool_type", "runway"),
-            "style": metadata.get("style", "cinematic")
-        }
-    )
-    
-    # Update usage statistics
-    await SupabaseService.update_user_usage(
-        user_id,
-        prompts_generated=1,
-        tokens_used=len(raw_input) // 4  # Rough estimate of tokens
-    ) 
+# Note: User tracking and database functions removed for development simplicity
