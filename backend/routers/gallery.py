@@ -46,7 +46,7 @@ async def browse_prompts(
     difficulty: Optional[str] = Query(None),
     platform: Optional[str] = Query(None),
     search: Optional[str] = Query(None),
-    sort_by: str = Query("popular", regex="^(popular|recent|rating|effectiveness|usage)$"),
+    sort_by: str = Query("popular"),
     featured_only: bool = Query(False)
 ):
     """Browse prompts with advanced filtering and sorting. No authentication required."""
