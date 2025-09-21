@@ -26,6 +26,11 @@ export interface PromptRequest {
   tone: string;
   persona: string;
   return_format: string;
+  context?: string;
+  output_format?: string;
+  length?: string;
+  language?: string;
+  custom_instructions?: string;
 }
 
 export interface MarketplaceTemplate {

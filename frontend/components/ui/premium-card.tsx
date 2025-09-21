@@ -108,7 +108,7 @@ const PremiumCard = React.forwardRef<HTMLDivElement, PremiumCardProps>(
         )}
 
         {/* Content */}
-        <div className="relative z-10">{children}</div>
+        <div className="relative z-10">{children as React.ReactNode}</div>
       </motion.div>
     )
   }

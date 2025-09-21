@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
-import { fetchFromApi, type PromptResponse, type PromptRequest, API_URL } from "@/lib/api"
+import { generatePrompts, type PromptResponse, type PromptRequest, API_URL } from "@/lib/api"
 import type { Prompt } from "@/types"
 import { useToast } from "@/components/ui/use-toast"
 import { Sparkles, Zap, Wand2, BookOpen, Target } from "lucide-react"
@@ -78,6 +78,7 @@ export default function PromptForm({ onResults }: PromptFormProps) {
 		mode: "deep",
 		tone: "professional",
 		persona: "assistant",
+		return_format: "plain",
 		context: "",
 		output_format: "paragraph",
 		length: "medium",
@@ -122,21 +123,15 @@ export default function PromptForm({ onResults }: PromptFormProps) {
 		setIsLoading(true)
 
 		try {
-			const response = await fetchFromApi("/refine", formData)
+			const response = await generatePrompts(formData)
 
-			if (response.data) {
-				const result: Prompt = {
-					id: Date.now().toString(),
-					original: formData.raw_input,
-					enhanced: response.data.enhanced_prompt,
-					mode: formData.mode,
-					improvements: response.data.improvements || [],
-					score: response.data.score || 0,
-					reasoning: response.data.reasoning || "",
-					timestamp: new Date()
-				}
+			if (response.refined_prompts) {
+				const results: Prompt[] = response.refined_prompts.map((prompt, index) => ({
+					id: `${Date.now()}-${index}`,
+					prompt: prompt
+				}))
 
-				onResults([result])
+				onResults(results)
 
 				toast({
 					title: "Prompt Enhanced!",
@@ -169,21 +164,15 @@ export default function PromptForm({ onResults }: PromptFormProps) {
 
 		try {
 			const quickData = { ...formData, mode }
-			const response = await fetchFromApi("/refine", quickData)
+			const response = await generatePrompts(quickData)
 
-			if (response.data) {
-				const result: Prompt = {
-					id: Date.now().toString(),
-					original: formData.raw_input,
-					enhanced: response.data.enhanced_prompt,
-					mode: mode,
-					improvements: response.data.improvements || [],
-					score: response.data.score || 0,
-					reasoning: response.data.reasoning || "",
-					timestamp: new Date()
-				}
+			if (response.refined_prompts) {
+				const results: Prompt[] = response.refined_prompts.map((prompt, index) => ({
+					id: `${Date.now()}-${index}`,
+					prompt: prompt
+				}))
 
-				onResults([result])
+				onResults(results)
 			}
 		} catch (error) {
 			console.error("Error with quick generation:", error)
@@ -212,7 +201,7 @@ export default function PromptForm({ onResults }: PromptFormProps) {
 			template.description.toLowerCase().includes(searchQuery.toLowerCase())
 		)
 		if (filtered.length > 0) {
-			acc[category] = filtered
+			(acc as any)[category] = filtered
 		}
 		return acc
 	}, {} as typeof PROMPT_TEMPLATES)
