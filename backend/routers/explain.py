@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends
+from fastapi import APIRouter, HTTPException, BackgroundTasks
 from pydantic import BaseModel
 import google.generativeai as genai
 import os
@@ -9,7 +9,6 @@ import hashlib
 from dotenv import load_dotenv
 from services.gemini_service import GEMINI_MODEL, MAX_API_TIMEOUT
 from services.supabase_service import SupabaseService
-from routers.users import get_current_user
 from typing import Dict, Any
 
 load_dotenv()
@@ -34,17 +33,10 @@ class ExplainRequest(BaseModel):
 async def explain_prompt(
     request: ExplainRequest,
     background_tasks: BackgroundTasks,
-    current_user: Dict[str, Any] = Depends(get_current_user)
 ):
+    """Explain prompt functionality. Authentication disabled for development."""
     if not GEMINI_MODEL:
         raise HTTPException(status_code=500, detail="Gemini API not configured")
-    
-    # Check usage quota
-    if current_user["usage_count"] >= current_user["usage_quota"]:
-        raise HTTPException(
-            status_code=403,
-            detail="Daily usage quota exceeded. Please upgrade your subscription."
-        )
     
     start_time = time.time()
     
@@ -55,16 +47,6 @@ async def explain_prompt(
         # Check if cache entry is still valid
         if time.time() - cache_entry["timestamp"] < CACHE_TTL:
             print(f"Cache hit for explain endpoint")
-            
-            # Track activity in the background even for cached responses
-            background_tasks.add_task(
-                track_explanation_activity,
-                current_user["id"],
-                request.prompt,
-                cache_entry["response"],
-                True  # is_cached
-            )
-            
             return {"explanation": cache_entry["response"]}
         else:
             # Remove expired cache entry
@@ -97,16 +79,7 @@ async def explain_prompt(
             "response": result,
             "timestamp": time.time()
         }
-        
-        # Track activity in the background
-        background_tasks.add_task(
-            track_explanation_activity,
-            current_user["id"],
-            request.prompt,
-            result,
-            False  # is_cached
-        )
-        
+
         return {"explanation": result}
     except asyncio.TimeoutError:
         elapsed = time.time() - start_time
@@ -124,24 +97,4 @@ async def explain_prompt(
             detail=f"Error processing request: {str(e)}"
         )
 
-async def track_explanation_activity(user_id: str, prompt: str, explanation: str, is_cached: bool = False):
-    """Track explanation activity in the database."""
-    # Track activity
-    await SupabaseService.track_activity(
-        user_id,
-        "prompt_explained",
-        None,
-        {
-            "prompt_length": len(prompt),
-            "explanation_length": len(explanation),
-            "is_cached": is_cached
-        }
-    )
-    
-    # Update usage statistics - only if not cached
-    if not is_cached:
-        await SupabaseService.update_user_usage(
-            user_id,
-            prompts_generated=1,
-            tokens_used=len(prompt) // 4  # Rough estimate of tokens
-        )
+# Note: User tracking functions removed for development simplicity

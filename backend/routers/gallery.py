@@ -6,7 +6,7 @@ from fastapi import APIRouter, HTTPException, Depends, Query, Path, Body
 from typing import Dict, Any, List, Optional, Union
 from pydantic import BaseModel
 from services.supabase_service import SupabaseService
-from routers.users import get_current_user, get_optional_user
+# User authentication removed for development simplicity
 import json
 
 router = APIRouter(prefix="/gallery", tags=["Gallery"])
