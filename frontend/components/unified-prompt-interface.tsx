@@ -373,17 +373,17 @@ export default function UnifiedPromptInterface({ onResults, results, onTabChange
           </div>
 
           {/* Right Column - Results */}
-          <div className="lg:col-span-1">
-            <div className="glass-dark rounded-2xl p-6 backdrop-blur-2xl border border-white/10">
-              <h3 className="text-xl font-bold text-white mb-4">Generated Results</h3>
+          <div className="lg:col-span-1 order-3">
+            <div className="glass-dark rounded-2xl p-4 sm:p-6 backdrop-blur-2xl border border-white/10">
+              <h3 className="text-lg sm:text-xl font-bold text-white mb-4">Generated Results</h3>
               {results.length > 0 ? (
                 <PromptResults results={results} />
               ) : (
-                <div className="text-center py-12">
-                  <Sparkles className="h-12 w-12 text-gray-500 mx-auto mb-4" />
-                  <p className="text-gray-400">Your generated prompts will appear here</p>
-                  <p className="text-sm text-gray-500 mt-2">
-                    Use the form on the left to create your custom prompts
+                <div className="text-center py-8 sm:py-12">
+                  <Sparkles className="h-8 sm:h-12 w-8 sm:w-12 text-gray-500 mx-auto mb-4" />
+                  <p className="text-sm sm:text-base text-gray-400">Your generated prompts will appear here</p>
+                  <p className="text-xs sm:text-sm text-gray-500 mt-2">
+                    Use the form to create your custom prompts
                   </p>
                 </div>
               )}
@@ -396,23 +396,23 @@ export default function UnifiedPromptInterface({ onResults, results, onTabChange
       {/* Prompt Detail Modal */}
       {selectedPrompt && (
         <motion.div
-          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-2 sm:p-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={() => setSelectedPrompt(null)}
         >
           <motion.div
-            className="glass-dark rounded-2xl border border-white/10 p-6 max-w-3xl w-full max-h-[80vh] overflow-y-auto"
+            className="glass-dark rounded-2xl border border-white/10 p-4 sm:p-6 max-w-3xl w-full max-h-[90vh] sm:max-h-[80vh] overflow-y-auto"
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-start justify-between mb-6">
-              <div>
-                <h2 className="text-2xl font-bold text-white mb-2">{selectedPrompt.title}</h2>
-                <Badge variant="outline" className="text-sm text-purple-300 border-purple-500/30">
+            <div className="flex items-start justify-between mb-4 sm:mb-6">
+              <div className="flex-1 pr-2">
+                <h2 className="text-lg sm:text-2xl font-bold text-white mb-2">{selectedPrompt.title}</h2>
+                <Badge variant="outline" className="text-xs sm:text-sm text-purple-300 border-purple-500/30">
                   {selectedPrompt.category}
                 </Badge>
               </div>

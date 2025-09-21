@@ -229,7 +229,7 @@ export default function WelcomePremium({ onStart }: WelcomePageProps) {
 
             {/* Main title with gradient animation */}
             <motion.h1
-              className="text-6xl md:text-7xl lg:text-8xl font-black mb-6 leading-tight"
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black mb-6 leading-tight px-2"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.8 }}
@@ -243,7 +243,7 @@ export default function WelcomePremium({ onStart }: WelcomePageProps) {
 
             {/* Subtitle */}
             <motion.p
-              className="text-xl md:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto"
+              className="text-lg sm:text-xl md:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto px-4"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5, duration: 0.8 }}
@@ -255,7 +255,7 @@ export default function WelcomePremium({ onStart }: WelcomePageProps) {
 
             {/* Feature pills */}
             <motion.div
-              className="flex flex-wrap justify-center gap-3 mb-10"
+              className="flex flex-wrap justify-center gap-2 sm:gap-3 mb-10 px-4"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.6, duration: 0.8 }}
@@ -264,8 +264,8 @@ export default function WelcomePremium({ onStart }: WelcomePageProps) {
                 <motion.div
                   key={mode.name}
                   className={cn(
-                    "px-4 py-2 rounded-full border border-white/20 backdrop-blur-md bg-white/5",
-                    "hover:bg-white/10 transition-all cursor-pointer",
+                    "px-3 sm:px-4 py-2 rounded-full border border-white/20 backdrop-blur-md bg-white/5",
+                    "hover:bg-white/10 transition-all cursor-pointer text-sm sm:text-base",
                     currentFeature === i && "border-white/50 bg-white/10"
                   )}
                   whileHover={{ scale: 1.05 }}
@@ -281,47 +281,49 @@ export default function WelcomePremium({ onStart }: WelcomePageProps) {
 
             {/* CTA Buttons */}
             <motion.div
-              className="flex flex-col sm:flex-row gap-4 justify-center items-center"
+              className="flex flex-col gap-4 justify-center items-center px-4"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.7, duration: 0.8 }}
             >
               <Button
                 size="lg"
-                className="group relative px-12 py-8 text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 transition-all duration-300 overflow-hidden shadow-2xl shadow-purple-500/25 hover:shadow-purple-500/40"
+                className="group relative w-full sm:w-auto px-8 sm:px-12 py-6 sm:py-8 text-lg sm:text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 transition-all duration-300 overflow-hidden shadow-2xl shadow-purple-500/25 hover:shadow-purple-500/40"
                 onClick={onStart}
               >
-                <span className="relative z-10 flex items-center">
+                <span className="relative z-10 flex items-center justify-center">
                   🚀 Get Started For Free
-                  <ArrowRight className="ml-3 h-6 w-6 group-hover:translate-x-1 transition-transform" />
+                  <ArrowRight className="ml-2 sm:ml-3 h-5 sm:h-6 w-5 sm:w-6 group-hover:translate-x-1 transition-transform" />
                 </span>
                 <div className="absolute inset-0 bg-gradient-to-r from-purple-400 to-pink-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               </Button>
 
-              <Button
-                size="lg"
-                variant="outline"
-                onClick={() => window.location.href = '/video-prompt'}
-                className="px-8 py-6 text-lg font-bold border-2 border-white/30 bg-white/5 backdrop-blur-md hover:bg-white/10 hover:border-white/50 transition-all"
-              >
-                <Video className="mr-2 h-5 w-5" />
-                Video Prompts
-              </Button>
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  onClick={() => window.location.href = '/video-prompt'}
+                  className="w-full sm:w-auto px-6 sm:px-8 py-4 sm:py-6 text-base sm:text-lg font-bold border-2 border-white/30 bg-white/5 backdrop-blur-md hover:bg-white/10 hover:border-white/50 transition-all"
+                >
+                  <Video className="mr-2 h-4 sm:h-5 w-4 sm:w-5" />
+                  Video Prompts
+                </Button>
 
-              <Button
-                size="lg"
-                variant="outline"
-                onClick={() => window.location.href = '/gallery'}
-                className="px-8 py-6 text-lg font-bold border-2 border-white/30 bg-white/5 backdrop-blur-md hover:bg-white/10 hover:border-white/50 transition-all"
-              >
-                <Palette className="mr-2 h-5 w-5" />
-                Browse Gallery
-              </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  onClick={() => window.location.href = '/gallery'}
+                  className="w-full sm:w-auto px-6 sm:px-8 py-4 sm:py-6 text-base sm:text-lg font-bold border-2 border-white/30 bg-white/5 backdrop-blur-md hover:bg-white/10 hover:border-white/50 transition-all"
+                >
+                  <Palette className="mr-2 h-4 sm:h-5 w-4 sm:w-5" />
+                  Browse Gallery
+                </Button>
+              </div>
             </motion.div>
 
             {/* Live stats */}
             <motion.div
-              className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6"
+              className="mt-12 sm:mt-16 grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 px-4"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.9, duration: 0.8 }}
@@ -337,10 +339,10 @@ export default function WelcomePremium({ onStart }: WelcomePageProps) {
                   <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 mb-2">
                     {stat.icon}
                   </div>
-                  <div className="text-3xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+                  <div className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
                     {stat.value}
                   </div>
-                  <div className="text-sm text-gray-400">{stat.label}</div>
+                  <div className="text-xs sm:text-sm text-gray-400">{stat.label}</div>
                 </motion.div>
               ))}
             </motion.div>
@@ -544,35 +546,37 @@ Style: Engaging storytelling with data-backed insights`}
           >
             <div className="absolute inset-0 bg-gradient-to-r from-purple-500/40 to-pink-500/40 blur-3xl" />
             <Card className="relative bg-gradient-to-br from-purple-900/40 to-pink-900/40 border-purple-400/30 backdrop-blur-xl p-12 shadow-2xl">
-              <h2 className="text-4xl md:text-5xl font-bold mb-4 text-white drop-shadow-lg">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 text-white drop-shadow-lg px-4">
                 Ready to Transform Your AI Experience?
               </h2>
-              <p className="text-xl text-gray-100 mb-8 drop-shadow-md">
+              <p className="text-lg sm:text-xl text-gray-100 mb-8 drop-shadow-md px-4">
                 Join the revolution in prompt engineering. Start creating amazing prompts today.
               </p>
 
               {/* Developer Attribution */}
-              <div className="mb-8 p-6 rounded-xl bg-gradient-to-r from-blue-900/40 to-purple-900/40 border border-blue-400/40 backdrop-blur-md shadow-lg">
-                <p className="text-lg text-gray-100 flex items-center justify-center gap-2 font-medium">
-                  💻 Crafted with passion by
-                  <span className="bg-gradient-to-r from-blue-300 to-purple-300 bg-clip-text text-transparent font-bold text-xl">
+              <div className="mb-8 p-4 sm:p-6 rounded-xl bg-gradient-to-r from-blue-900/40 to-purple-900/40 border border-blue-400/40 backdrop-blur-md shadow-lg mx-4">
+                <p className="text-sm sm:text-lg text-gray-100 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 font-medium text-center">
+                  <span>💻 Crafted with passion by</span>
+                  <span className="bg-gradient-to-r from-blue-300 to-purple-300 bg-clip-text text-transparent font-bold text-lg sm:text-xl">
                     @Talktodre-ops
                   </span>
-                  - Your AI Development Partner
+                  <span className="hidden sm:inline">- Your AI Development Partner</span>
                 </p>
-                <p className="text-sm text-gray-200 mt-2 text-center">
+                <p className="text-xs sm:text-sm text-gray-200 mt-2 text-center">
                   🌟 Follow my journey building cutting-edge AI tools for the community!
                 </p>
               </div>
-              <div className="flex justify-center">
+              <div className="flex justify-center px-4">
                 <Button
                   size="lg"
-                  className="px-12 py-8 text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-2xl shadow-purple-500/25 hover:shadow-purple-500/40 group"
+                  className="w-full sm:w-auto px-6 sm:px-12 py-6 sm:py-8 text-base sm:text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-2xl shadow-purple-500/25 hover:shadow-purple-500/40 group"
                   onClick={onStart}
                 >
-                  <Unlock className="mr-3 h-6 w-6 group-hover:scale-110 transition-transform" />
-                  🎯 Start Creating Amazing Prompts Now - FREE!
-                  <Sparkles className="ml-3 h-6 w-6 group-hover:scale-110 transition-transform" />
+                  <Unlock className="mr-2 sm:mr-3 h-5 sm:h-6 w-5 sm:w-6 group-hover:scale-110 transition-transform" />
+                  <span className="text-center leading-tight">
+                    🎯 Start Creating Amazing Prompts Now - FREE!
+                  </span>
+                  <Sparkles className="ml-2 sm:ml-3 h-5 sm:h-6 w-5 sm:w-6 group-hover:scale-110 transition-transform" />
                 </Button>
               </div>
             </Card>
