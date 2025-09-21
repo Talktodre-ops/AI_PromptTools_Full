@@ -12,7 +12,7 @@ from collections import defaultdict
 
 # Add the parent directory to sys.path to allow imports from sibling directories
 sys.path.append(str(Path(__file__).parent.parent))
-from routers import refine, explain, video, users, analytics, image, gallery
+from routers import refine, explain, video, image, gallery
 from services.supabase_service import SupabaseService
 
 app = FastAPI(
@@ -114,8 +114,6 @@ async def generic_exception_handler(request, exc):
 app.include_router(refine.router)
 app.include_router(explain.router)
 app.include_router(video.router)
-app.include_router(users.router)
-app.include_router(analytics.router)
 app.include_router(image.router, tags=["image"])
 app.include_router(gallery.router, tags=["gallery"])
 
