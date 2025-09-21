@@ -9,6 +9,11 @@ export interface PromptRequest {
   tone: string
   persona: string
   return_format: string  // Changed from format to match your form data
+  context?: string
+  output_format?: string
+  length?: string
+  language?: string
+  custom_instructions?: string
 }
 
 export interface VideoPromptRequest {

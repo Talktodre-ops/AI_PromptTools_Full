@@ -27,8 +27,8 @@ const pageVariants = {
 }
 
 const pageTransition = {
-  type: "tween",
-  ease: "anticipate",
+  type: "tween" as const,
+  ease: "anticipate" as const,
   duration: 0.6,
 }
 
@@ -66,7 +66,7 @@ export const staggerItem = {
     y: 0,
     transition: {
       duration: 0.5,
-      ease: "easeOut",
+      ease: "easeOut" as const,
     },
   },
 }

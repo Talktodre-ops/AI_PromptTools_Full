@@ -31,6 +31,11 @@ export interface RatingResponse {
 // Fetch all prompts from prompt_gallery table
 export async function fetchGalleryPrompts(): Promise<PromptGalleryData[]> {
   try {
+    if (!supabase) {
+      console.warn('Supabase client not configured')
+      return []
+    }
+
     const { data, error } = await supabase
       .from('prompt_gallery')
       .select('*')
@@ -47,6 +52,11 @@ export async function fetchGalleryPrompts(): Promise<PromptGalleryData[]> {
 // Search prompts by title or content
 export async function searchGalleryPrompts(searchQuery: string = ''): Promise<PromptGalleryData[]> {
   try {
+    if (!supabase) {
+      console.warn('Supabase client not configured')
+      return []
+    }
+
     if (!searchQuery.trim()) {
       return await fetchGalleryPrompts()
     }
@@ -79,6 +89,11 @@ export async function copyPromptToClipboard(promptContent: string): Promise<bool
 // Toggle favorite status
 export async function toggleFavorite(promptId: string): Promise<boolean | null> {
   try {
+    if (!supabase) {
+      console.warn('Supabase client not configured')
+      return null
+    }
+
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
       throw new Error('User must be authenticated to favorite prompts')
@@ -100,6 +115,11 @@ export async function toggleFavorite(promptId: string): Promise<boolean | null> 
 // Track prompt usage
 export async function trackPromptUsage(promptId: string, platform: string = 'web'): Promise<void> {
   try {
+    if (!supabase) {
+      console.warn('Supabase client not configured')
+      return
+    }
+
     const { data: { user } } = await supabase.auth.getUser()
 
     const { error } = await supabase.rpc('increment_prompt_usage', {
@@ -117,6 +137,11 @@ export async function trackPromptUsage(promptId: string, platform: string = 'web
 // Get user-specific prompt data
 export async function getUserPromptData(promptId: string): Promise<any> {
   try {
+    if (!supabase) {
+      console.warn('Supabase client not configured')
+      return null
+    }
+
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return null
 
@@ -172,6 +197,11 @@ export function extractCategoriesFromTitles(prompts: PromptGalleryData[]): Array
 
 // Real-time subscription for prompt ratings
 export function subscribeToPromptRatings(promptId: string, callback: (payload: any) => void) {
+  if (!supabase) {
+    console.warn('Supabase client not configured')
+    return null
+  }
+
   return supabase
     .channel(`prompt_ratings:${promptId}`)
     .on(
@@ -189,6 +219,10 @@ export function subscribeToPromptRatings(promptId: string, callback: (payload: a
 
 // Authentication helpers
 export async function signInWithEmail(email: string, password: string) {
+  if (!supabase) {
+    throw new Error('Supabase client not configured')
+  }
+
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password
@@ -197,6 +231,10 @@ export async function signInWithEmail(email: string, password: string) {
 }
 
 export async function signUpWithEmail(email: string, password: string) {
+  if (!supabase) {
+    throw new Error('Supabase client not configured')
+  }
+
   const { data, error } = await supabase.auth.signUp({
     email,
     password
@@ -205,11 +243,19 @@ export async function signUpWithEmail(email: string, password: string) {
 }
 
 export async function signOut() {
+  if (!supabase) {
+    throw new Error('Supabase client not configured')
+  }
+
   const { error } = await supabase.auth.signOut()
   return { error }
 }
 
 export async function getCurrentUser() {
+  if (!supabase) {
+    throw new Error('Supabase client not configured')
+  }
+
   const { data: { user }, error } = await supabase.auth.getUser()
   return { user, error }
 }

@@ -54,7 +54,13 @@ const PremiumButton = React.forwardRef<HTMLButtonElement, PremiumButtonProps>(
     const [ripples, setRipples] = React.useState<Array<{ id: number; x: number; y: number }>>([])
     const [isHovered, setIsHovered] = React.useState(false)
 
-    const Comp = asChild ? Slot : motion.button
+    // Separate motion props from regular HTML props
+    const {
+      variants, initial, animate, exit, transition, style, whileHover, whileTap, whileFocus, whileInView,
+      onDrag, onDragEnd, onDragStart, onDirectionLock, onDragTransitionEnd, onHoverEnd, onHoverStart,
+      onTap, onTapCancel, onTapStart, onPan, onPanEnd, onPanSessionStart, onPanStart, onUpdate,
+      onAnimationComplete, onAnimationStart, ...htmlProps
+    } = props
 
     const createRipple = (event: React.MouseEvent<HTMLButtonElement>) => {
       const button = event.currentTarget
@@ -90,20 +96,8 @@ const PremiumButton = React.forwardRef<HTMLButtonElement, PremiumButtonProps>(
       }
     }
 
-    return (
-      <Comp
-        ref={ref}
-        className={cn(premiumButtonVariants({ variant, size, className }))}
-        onClick={createRipple}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-        variants={buttonVariants}
-        initial="rest"
-        whileHover="hover"
-        whileTap="tap"
-        style={{ perspective: 1000 }}
-        {...props}
-      >
+    const buttonContent = (
+      <>
         {/* Ripple effects */}
         {ripples.map((ripple) => (
           <motion.div
@@ -117,7 +111,7 @@ const PremiumButton = React.forwardRef<HTMLButtonElement, PremiumButtonProps>(
             }}
             initial={{ scale: 0, opacity: 0.8 }}
             animate={{ scale: 2, opacity: 0 }}
-            transition={{ duration: 1, ease: "easeOut" }}
+            transition={{ duration: 1, ease: "easeOut" as const }}
           />
         ))}
 
@@ -135,8 +129,40 @@ const PremiumButton = React.forwardRef<HTMLButtonElement, PremiumButtonProps>(
         <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 transform translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000 ease-out" />
 
         {/* Content */}
-        <span className="relative z-10">{children}</span>
-      </Comp>
+        <span className="relative z-10">{children as React.ReactNode}</span>
+      </>
+    )
+
+    if (asChild) {
+      return (
+        <Slot
+          ref={ref}
+          className={cn(premiumButtonVariants({ variant, size, className }))}
+          onClick={createRipple}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+          {...htmlProps}
+        >
+          {buttonContent}
+        </Slot>
+      )
+    }
+
+    return (
+      <motion.button
+        ref={ref}
+        className={cn(premiumButtonVariants({ variant, size, className }))}
+        onClick={createRipple}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        variants={buttonVariants}
+        initial="rest"
+        whileHover="hover"
+        whileTap="tap"
+        {...props}
+      >
+        {buttonContent}
+      </motion.button>
     )
   }
 )
