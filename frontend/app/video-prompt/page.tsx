@@ -16,11 +16,21 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Progress } from "@/components/ui/progress"
 import { cleanPromptText } from "@/lib/utils" // Import the utility
 
-export default function MediaPromptPage() {
-  const router = useRouter()
+// Component that uses useSearchParams wrapped in Suspense
+function SearchParamsHandler({ onTabChange }: { onTabChange: (tab: string) => void }) {
   const searchParams = useSearchParams()
-  
-  const [activeTab, setActiveTab] = useState(searchParams.get("tab") || "video")
+
+  useEffect(() => {
+    const tab = searchParams.get("tab") || "video"
+    onTabChange(tab)
+  }, [searchParams, onTabChange])
+
+  return null
+}
+
+function MediaPromptPageContent() {
+  const router = useRouter()
+  const [activeTab, setActiveTab] = useState("video")
   const [results, setResults] = useState<Prompt[]>([])
   const [usage, setUsage] = useState({ daily: 0, total: 0 })
 
@@ -44,7 +54,11 @@ export default function MediaPromptPage() {
   const handleBack = () => router.push('/')
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950 dark:to-purple-950">
+    <>
+      <Suspense fallback={<div className="hidden">Loading...</div>}>
+        <SearchParamsHandler onTabChange={setActiveTab} />
+      </Suspense>
+      <main className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950 dark:to-purple-950">
       <motion.section 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -88,6 +102,19 @@ export default function MediaPromptPage() {
         </Tabs>
       </div>
       <Toaster />
-    </main>
+      </main>
+    </>
+  )
+}
+
+export default function MediaPromptPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-purple-500"></div>
+      </div>
+    }>
+      <MediaPromptPageContent />
+    </Suspense>
   )
 } 
