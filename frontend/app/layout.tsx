@@ -34,6 +34,11 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/",
   },
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
+    apple: "/favicon.ico",
+  },
   openGraph: {
     title: "PROMPTHERO - Transform Messy Thoughts into Perfect AI Prompts",
     description:
@@ -57,7 +62,7 @@ export const metadata: Metadata = {
     description:
       "AI-powered prompt engineering tool that transforms your rough ideas into high-quality, ready-to-use prompts.",
     images: ["/og-image.png"],
-    creator: "@prompthero",
+    creator: "@talktodre100",
   },
   robots: {
     index: true,
@@ -81,10 +86,6 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <link rel="icon" href="/favicon.ico" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
         <link rel="manifest" href="/site.webmanifest" />
         <script
           type="application/ld+json"
