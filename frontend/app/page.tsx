@@ -80,7 +80,7 @@ function PageContent() {
           {/* Glass card effect */}
           <div className="relative z-10 max-w-4xl mx-auto text-center px-4">
             <div className="glass rounded-2xl p-8 backdrop-blur-2xl border border-white/10">
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-black mb-4 bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 bg-clip-text text-transparent animate-gradient-x px-2">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black mb-4 bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 bg-clip-text text-transparent animate-gradient-x px-2 leading-tight">
                 {getHeaderText()}
               </h1>
               <p className="text-lg sm:text-xl text-gray-300 px-4">Craft perfect AI prompts with our advanced builder</p>

@@ -229,21 +229,21 @@ export default function WelcomePremium({ onStart }: WelcomePageProps) {
 
             {/* Main title with gradient animation */}
             <motion.h1
-              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black mb-6 leading-tight px-2"
+              className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black mb-4 sm:mb-6 leading-tight px-2"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.8 }}
             >
               <span className="block text-white">Transform Your</span>
-              <span className="block mt-2 bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 bg-clip-text text-transparent animate-gradient-x">
+              <span className="block mt-1 sm:mt-2 bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 bg-clip-text text-transparent animate-gradient-x">
                 AI Prompts
               </span>
-              <span className="block text-white mt-2">Into Magic</span>
+              <span className="block text-white mt-1 sm:mt-2">Into Magic</span>
             </motion.h1>
 
             {/* Subtitle */}
             <motion.p
-              className="text-lg sm:text-xl md:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto px-4"
+              className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-300 mb-6 sm:mb-8 max-w-3xl mx-auto px-4 leading-relaxed"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5, duration: 0.8 }}
@@ -255,7 +255,7 @@ export default function WelcomePremium({ onStart }: WelcomePageProps) {
 
             {/* Feature pills */}
             <motion.div
-              className="flex flex-wrap justify-center gap-2 sm:gap-3 mb-10 px-4"
+              className="flex flex-wrap justify-center gap-1 sm:gap-2 mb-6 sm:mb-8 px-4"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.6, duration: 0.8 }}
@@ -292,7 +292,7 @@ export default function WelcomePremium({ onStart }: WelcomePageProps) {
                 onClick={onStart}
               >
                 <span className="relative z-10 flex items-center justify-center">
-                  🚀 Get Started For Free
+                  Get Started for Free
                   <ArrowRight className="ml-2 sm:ml-3 h-5 sm:h-6 w-5 sm:w-6 group-hover:translate-x-1 transition-transform" />
                 </span>
                 <div className="absolute inset-0 bg-gradient-to-r from-purple-400 to-pink-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -323,7 +323,7 @@ export default function WelcomePremium({ onStart }: WelcomePageProps) {
 
             {/* Live stats */}
             <motion.div
-              className="mt-12 sm:mt-16 grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 px-4"
+              className="mt-8 sm:mt-12 grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 px-4"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.9, duration: 0.8 }}
@@ -360,7 +360,7 @@ export default function WelcomePremium({ onStart }: WelcomePageProps) {
       </motion.section>
 
       {/* Features Grid Section */}
-      <section className="py-32 px-4 relative">
+      <section className="py-16 sm:py-24 md:py-32 px-4 relative">
         <div className="max-w-7xl mx-auto">
           <motion.div
             className="text-center mb-16"
@@ -409,7 +409,7 @@ export default function WelcomePremium({ onStart }: WelcomePageProps) {
       </section>
 
       {/* Interactive Demo Section */}
-      <section className="py-32 px-4 relative bg-gradient-to-b from-black to-gray-900">
+      <section className="py-16 sm:py-24 md:py-32 px-4 relative bg-gradient-to-b from-black to-gray-900">
         <div className="max-w-6xl mx-auto">
           <motion.div
             className="text-center mb-16"
@@ -484,7 +484,7 @@ Style: Engaging storytelling with data-backed insights`}
       </section>
 
       {/* Testimonials */}
-      <section className="py-32 px-4 relative">
+      <section className="py-16 sm:py-24 md:py-32 px-4 relative">
         <div className="max-w-7xl mx-auto">
           <motion.div
             className="text-center mb-16"
@@ -536,7 +536,7 @@ Style: Engaging storytelling with data-backed insights`}
       </section>
 
       {/* Final CTA */}
-      <section className="py-32 px-4 relative">
+      <section className="py-16 sm:py-24 md:py-32 px-4 relative">
         <div className="max-w-4xl mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
@@ -574,7 +574,7 @@ Style: Engaging storytelling with data-backed insights`}
                 >
                   <Unlock className="mr-2 sm:mr-3 h-5 sm:h-6 w-5 sm:w-6 group-hover:scale-110 transition-transform" />
                   <span className="text-center leading-tight">
-                    🎯 Start Creating Amazing Prompts Now - FREE!
+                    Get Started for Free
                   </span>
                   <Sparkles className="ml-2 sm:ml-3 h-5 sm:h-6 w-5 sm:w-6 group-hover:scale-110 transition-transform" />
                 </Button>

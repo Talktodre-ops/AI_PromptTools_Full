@@ -207,28 +207,31 @@ export default function UnifiedPromptInterface({ onResults, results, onTabChange
     <div className="w-full">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         {/* Tab Navigation */}
-        <div className="flex justify-center mb-8">
-          <TabsList className="glass backdrop-blur-2xl border border-white/10 bg-black/20 p-2 rounded-2xl">
+        <div className="flex justify-center mb-8 px-2">
+          <TabsList className="glass backdrop-blur-2xl border border-white/10 bg-black/20 p-1 sm:p-2 rounded-2xl w-full max-w-2xl">
             <TabsTrigger
               value="text"
-              className="flex items-center gap-2 px-6 py-3 rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500/30 data-[state=active]:to-pink-500/30 data-[state=active]:text-white text-gray-400 hover:text-white transition-all"
+              className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 md:px-6 py-2 sm:py-3 rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500/30 data-[state=active]:to-pink-500/30 data-[state=active]:text-white text-gray-400 hover:text-white transition-all text-xs sm:text-sm flex-1 justify-center"
             >
-              <MessageSquare className="h-4 w-4" />
-              Text Prompts
+              <MessageSquare className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Text Prompts</span>
+              <span className="sm:hidden">Text</span>
             </TabsTrigger>
             <TabsTrigger
               value="video"
-              className="flex items-center gap-2 px-6 py-3 rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-500/30 data-[state=active]:to-orange-500/30 data-[state=active]:text-white text-gray-400 hover:text-white transition-all"
+              className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 md:px-6 py-2 sm:py-3 rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-500/30 data-[state=active]:to-orange-500/30 data-[state=active]:text-white text-gray-400 hover:text-white transition-all text-xs sm:text-sm flex-1 justify-center"
             >
-              <Film className="h-4 w-4" />
-              Video Prompts
+              <Film className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Video Prompts</span>
+              <span className="sm:hidden">Video</span>
             </TabsTrigger>
             <TabsTrigger
               value="image"
-              className="flex items-center gap-2 px-6 py-3 rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/30 data-[state=active]:to-cyan-500/30 data-[state=active]:text-white text-gray-400 hover:text-white transition-all"
+              className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 md:px-6 py-2 sm:py-3 rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/30 data-[state=active]:to-cyan-500/30 data-[state=active]:text-white text-gray-400 hover:text-white transition-all text-xs sm:text-sm flex-1 justify-center"
             >
-              <ImageIcon className="h-4 w-4" />
-              Image Prompts
+              <ImageIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Image Prompts</span>
+              <span className="sm:hidden">Image</span>
             </TabsTrigger>
           </TabsList>
         </div>
