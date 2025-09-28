@@ -1,0 +1,26 @@
+name: Keep Supabase Alive
+
+on:
+  schedule:
+    # Run every 3 days to keep Supabase active (pauses after 7 days inactivity)
+    - cron: '0 12 */3 * *'  # Every 3 days at 12:00 UTC
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  keep-supabase-alive:
+    name: Keep Supabase Alive
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Ping Supabase
+      run: |
+        echo "Pinging Supabase to keep connection alive..."
+        echo "Target URL: ${{ secrets.SUPABASE_URL }}"
+        curl -f "${{ secrets.SUPABASE_URL }}/rest/v1/" \
+          -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+          -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" || echo "Supabase ping failed"
+
+    - name: Log Supabase Status
+      run: |
+        echo "Supabase keep-alive completed at $(date)"
+        echo "Supabase URL: ${{ secrets.SUPABASE_URL }}"
