@@ -1,9 +1,9 @@
-name: Keep Services Alive
+name: Keep Render Backend Alive
 
 on:
   schedule:
-    # Run every 10 minutes to keep services active
-    - cron: '*/10 * * * *'
+    # Run every 14 minutes to keep Render active (sleeps after 15min inactivity)
+    - cron: '*/14 * * * *'
   workflow_dispatch: # Allow manual trigger
 
 jobs:
@@ -22,21 +22,3 @@ jobs:
       run: |
         echo "Render keep-alive completed at $(date)"
         echo "Backend URL: https://prompt-engineer-api.onrender.com"
-
-  keep-supabase-alive:
-    name: Keep Supabase Alive
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Ping Supabase
-      run: |
-        echo "Pinging Supabase to keep connection alive..."
-        echo "Target URL: ${{ secrets.SUPABASE_URL }}"
-        curl -f "${{ secrets.SUPABASE_URL }}/rest/v1/" \
-          -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
-          -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" || echo "Supabase ping failed"
-
-    - name: Log Supabase Status
-      run: |
-        echo "Supabase keep-alive completed at $(date)"
-        echo "Supabase URL: ${{ secrets.SUPABASE_URL }}"
